@@ -41,8 +41,6 @@ Všechno je v **`data/songs.js`**. Zkopíruj šablonu z konce souboru a vyplň:
 {
   slug: 'jmena-pisne',          // malá písmena bez diakritiky, pomlčky místo mezer
   title: 'Jméno písně',
-  author: 'lidová',
-  tags: ['hody'],
   text: `
 První řádek první sloky,
 druhý řádek první sloky.
