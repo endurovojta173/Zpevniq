@@ -67,7 +67,25 @@ ona sa jim v noci utrhla.
     title: 'Břeclavská kasárna',
     author: 'lidová',
     tags: ['hody'],
-    text: '',
+    text: `
+Břeclavská kasárňa malovaná, malujů ju chlapci se šavlama,
+chlapci se šavlama, děvčata slzama, břeclavská kasárňa malovaná.
+
+Břeclavská kasárňa malovaná, malujů ju chlapci se šavlama,
+chlapci se šavlama, děvčata slzama, břeclavská kasárňa malovaná.
+
+Břeclavská kasárňa široký dvůr, po něm sa procházá šohajek můj,
+po něm sa procházá, převelice pláče, až sa ta kasárňa celá třase.
+
+Břeclavská kasárňa široký dvůr, po něm sa procházá šohajek můj,
+po něm sa procházá, převelice pláče, až sa ta kasárňa celá třase.
+
+Počkajte, děvčata, tři měsíce, bude nás rukovat na tisíce,
+vy budete plakat, my budeme skákat v břeclavské hospodě při muzice.
+
+Počkajte, děvčata, tři měsíce, bude nás rukovat na tisíce,
+vy budete plakat, my budeme skákat v břeclavské hospodě při muzice.
+`,
   },
   {
     slug: 'nedaleko-od-trencina',
