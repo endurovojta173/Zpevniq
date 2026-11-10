@@ -68,23 +68,14 @@ ona sa jim v noci utrhla.
     author: 'lidová',
     tags: ['hody'],
     text: `
-Břeclavská kasárňa malovaná, malujů ju chlapci se šavlama,
-chlapci se šavlama, děvčata slzama, břeclavská kasárňa malovaná.
+Břeclavská kasárňa malovaná, malujů ju chlapci se šavlama.
+Chlapci se šavlama, děvčata slzama, břeclavská kasárňa malovaná. 2x
 
-Břeclavská kasárňa malovaná, malujů ju chlapci se šavlama,
-chlapci se šavlama, děvčata slzama, břeclavská kasárňa malovaná.
+Břeclavská kasárňa široký dvůr, po něm sa procházá šohajek můj.
+Po něm sa procházá, převelice pláče, až sa ta kasárňa celá třase. 2x
 
-Břeclavská kasárňa široký dvůr, po něm sa procházá šohajek můj,
-po něm sa procházá, převelice pláče, až sa ta kasárňa celá třase.
-
-Břeclavská kasárňa široký dvůr, po něm sa procházá šohajek můj,
-po něm sa procházá, převelice pláče, až sa ta kasárňa celá třase.
-
-Počkajte, děvčata, tři měsíce, bude nás rukovat na tisíce,
-vy budete plakat, my budeme skákat v břeclavské hospodě při muzice.
-
-Počkajte, děvčata, tři měsíce, bude nás rukovat na tisíce,
-vy budete plakat, my budeme skákat v břeclavské hospodě při muzice.
+Počkajte děvčata tři měsíce, bude nás rukovat na tisíce.
+vy budete plakat, my budeme skákat v břeclavské hospodě při muzice. 2x
 `,
   },
   {

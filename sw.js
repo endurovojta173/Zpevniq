@@ -6,7 +6,7 @@
  * stáhly novou verzi: 'zpevnik-v1' → 'zpevnik-v2'.
  */
 
-const CACHE_VERSION = 'zpevnik-v9';
+const CACHE_VERSION = 'zpevnik-v10';
 
 const PRECACHE = [
   './',
