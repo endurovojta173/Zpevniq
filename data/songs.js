@@ -33,7 +33,19 @@ probudím se, obrátím se, ale jak mě ten sen oklamal.
     title: 'Co jste hasiči',
     author: 'lidová',
     tags: ['hody'],
-    text: '',
+    text: `
+Co jste hasiči, co jste dělali,
+že jste nám ten pivo, pivo, pivovárek shořet nechali,
+že jste nám ten pivo, pivo, pivovárek shořet nechali.
+
+Shořet nechali aj tu hospodu,
+my starý mazáci, starý ulejváci, máme pít vodu,
+my starý mazáci, starý ulejváci, máme pít vodu.
+
+Vodu nepijem, my pijeme rum,
+vodu pijou žáby, pivo starý báby, my pijeme rum,
+vodu pijou žáby, pivo starý báby, my pijeme rum.
+`,
   },
   {
     slug: 'vysoky-jalovec',
