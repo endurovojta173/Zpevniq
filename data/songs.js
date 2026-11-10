@@ -126,7 +126,35 @@ takú frajárečku já chcem, co má jméno Kateřina.
     title: 'Kdyby byla Morava',
     author: 'lidová',
     tags: ['hody'],
-    text: '',
+    text: `
+Kdyby byla Morava jako je Slezko,
+dala bych ti huběnku, až by to plesklo,
+ale že je Morava malučká,
+ošidila dcérečka synečka,
+ale že je Morava malučká,
+ošidila dcérečka synečka.
+
+Kdyby byla Morava jako je Vídeň,
+dala bych ti huběnek na celý týden,
+ale že je Morava malučká,
+ošidila dcérečka synečka,
+ale že je Morava malučká,
+ošidila dcérečka synečka.
+
+Kdyby byla Morava jako jsou Čechy,
+dala bych ti huběnek za čtyry měchy,
+ale že je Morava malučká,
+ošidila dcérečka synečka,
+ale že je Morava malučká,
+ošidila dcérečka synečka.
+
+Kdyby byla Morava jako jsou Uhry,
+dala bych ti huběnek na čtyry fůry,
+ale že je Morava malučká,
+ošidila dcérečka synečka,
+ale že je Morava malučká,
+ošidila dcérečka synečka.
+`,
   },
   {
     slug: 'vinecko-bile',
