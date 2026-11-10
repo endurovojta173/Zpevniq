@@ -18,14 +18,14 @@ const SONGS = [
     author: 'lidová',
     tags: ['hody'],
     text: `
-Na Pankráci na malém vršíčku, stojí pěkné stromořadí,
-měl jsem holku namluvenou, ale jinej mě za ní chodí.
+/: Na Pankráci na malém vršíčku, stojí pěkné stromořadí, :/
+/: měl jsem holku namluvenou, ale jinej mě za ní chodí. :/
 
-Vy mládenci, kteří jste jako já, nemilujte doopravdy,
-pomilujte, pošpásujte, ale lásku jim neslibujte.
+/: Vy mládenci, kteří jste jako já, nemilujte doopravdy, :/
+/: pomilujte, pošpásujte, ale lásku jim neslibujte. :/
 
-Zdálo se mě ze čtvrtka na pátek, že jsem se svou Andulkou spal,
-probudím se, obrátím se, ale jak mě ten sen oklamal.
+/: Zdálo se mě ze čtvrtka na pátek, že jsem se svou Andulkou spal, :/
+/: probudím se, obrátím se, ale jak mě ten sen oklamal. :/
 `,
   },
   {
