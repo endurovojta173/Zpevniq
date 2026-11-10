@@ -130,10 +130,22 @@ takú frajárečku já chcem, co má jméno Kateřina.
   },
   {
     slug: 'vinecko-bile',
-    title: 'Vinečko bílé',
+    title: 'Vínečko bílé',
     author: 'lidová',
     tags: ['hody'],
-    text: '',
+    text: `
+Vínečko bílé, si od mé milé,
+budu ťa pít, co budu žít, vínečko bílé,
+budu ťa pít, co budu žít, vínečko bílé.
+
+Vínečko rudé, si od té druhé,
+budu ťa pít, co budu žít, vínečko rudé,
+budu ťa pít, co budu žít, vínečko rudé.
+
+Vínečka obě, frajárky moje,
+budu vás pít, co budu žít, vínečka obě,
+budu vás pít, co budu žít, vínečka obě.
+`,
   },
 ];
 
