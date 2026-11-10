@@ -53,13 +53,37 @@ vodu pijou žáby, pivo starý báby, my pijeme rum.
     author: 'lidová',
     tags: ['hody'],
     text: `
-Vysoký jalovec, vysoký jako já,
-přeskoč ho, má milá, rovnýma nohama.
-Já ho nepřeskočím, já sa ráda točím,
-na tebe, šohajku, zapomenut musím.
+Vysoký jalovec, vysoký ako ja,
+preskoč ho má milá rovnýma nohama.
+Ja ho nepreskočím, ja sa rada točím,
+na teba šuhajko zapomenúť musím.
 
-Uvázali kozu u trna,
-ona sa jim v noci utrhla.
+Uvázali kozu u tr tr tr, u tr tr tr.
+Uvázali kozu u drna.
+Ona sa im v noci u tr tr tr, u tr tr tr.
+Ona sa im v noci utrhla.
+
+Vysoký jalovec, vysoký ako ja,
+preskoč ho má milá rovnýma nohama.
+Ja ho nepreskočím, ja sa rada točím,
+na teba šuhajko zapomenúť musím.
+
+Uvázali kozu u tr tr tr, u tr tr tr.
+Uvázali kozu u drna.
+Ona sa im v noci u tr tr tr, u tr tr tr.
+Ona sa im v noci utrhla.
+
+Vysoký jalovec, vysoký ako ja,
+preskoč ho má milá rovnýma nohama.
+Ja ho nepreskočím, ja sa rada točím,
+na teba šuhajko zapomenúť musím.
+
+Mezihra
+
+Vysoký jalovec, vysoký ako ja,
+preskoč ho má milá rovnýma nohama.
+Ja ho nepreskočím, ja sa rada točím,
+na teba šuhajko zapomenúť musím.
 `,
   },
   {
