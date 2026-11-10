@@ -1,4 +1,4 @@
-# Zpěvník
+# Zpěvník na hody 2026
 
 Statický zpěvník lidových a hodových písní — texty na mobil, žádné akordy, žádný build.
 

@@ -1,7 +1,7 @@
 {
-  "name": "Zpěvník",
-  "short_name": "Zpěvník",
-  "description": "Texty lidových a hodových písní na mobil — funguje i bez signálu.",
+  "name": "Zpěvník na hody 2026",
+  "short_name": "Zpěvník na hody 2026",
+  "description": "Zpěvník na hody 2026",
   "lang": "cs",
   "start_url": "./",
   "scope": "./",

@@ -9,7 +9,7 @@
   const STORAGE_FONT = 'zpevnik:font';
   const FONT_SIZES = ['small', 'medium', 'large'];
   const DEFAULT_FONT = 'medium';
-  const TITLE = 'Zpěvník';
+  const TITLE = 'Zpěvník na hody 2026';
 
   const $ = function (selector) {
     return document.querySelector(selector);
