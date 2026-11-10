@@ -52,7 +52,15 @@ vodu pijou žáby, pivo starý báby, my pijeme rum.
     title: 'Vysoký jalovec',
     author: 'lidová',
     tags: ['hody'],
-    text: '',
+    text: `
+Vysoký jalovec, vysoký jako já,
+přeskoč ho, má milá, rovnýma nohama.
+Já ho nepřeskočím, já sa ráda točím,
+na tebe, šohajku, zapomenut musím.
+
+Uvázali kozu u trna,
+ona sa jim v noci utrhla.
+`,
   },
   {
     slug: 'breclavska-kasarna',
