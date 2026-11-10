@@ -17,7 +17,16 @@ const SONGS = [
     title: 'Na Pankráci',
     author: 'lidová',
     tags: ['hody'],
-    text: '',
+    text: `
+Na Pankráci na malém vršíčku, stojí pěkné stromořadí,
+měl jsem holku namluvenou, ale jinej mě za ní chodí.
+
+Vy mládenci, kteří jste jako já, nemilujte doopravdy,
+pomilujte, pošpásujte, ale lásku jim neslibujte.
+
+Zdálo se mě ze čtvrtka na pátek, že jsem se svou Andulkou spal,
+probudím se, obrátím se, ale jak mě ten sen oklamal.
+`,
   },
   {
     slug: 'co-jste-hasici',
