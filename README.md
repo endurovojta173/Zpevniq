@@ -6,19 +6,22 @@ Statický zpěvník lidových a hodových písní — texty na mobil, žádné a
 
 ## Co to umí
 
-- hledání **bez ohledu na diakritiku** („hradce" najde „Hradce")
-- filtr podle štítků (zobrazí se, až bude ve zpěvníku víc než jeden štítek)
-- odkaz na konkrétní píseň přes `#/pisen/<slug>` — dá se sdílet
-- tři velikosti písma a světlý/tmavý režim (obojí se pamatuje)
-- **funguje offline** (PWA) — stačí jednou načíst a přidat si zpěvník na plochu
+- prostý seznam písní — klepnutím se otevře text
+- odkaz na konkrétní píseň přes `#/pisen/<slug>` (dá se sdílet)
+- tři velikosti písma — volba se pamatuje
+- **funguje offline** (PWA): jednou načíst a přidat si zpěvník na plochu
 - tisk / PDF: každá píseň na vlastní stránce
+
+Záměrně tam **není** vyhledávání ani tmavý režim — u ohně chceš otevřít seznam
+a klepnout, ne lovit v inputu. Kdyby to někdy chybělo, dá se to doplnit.
+
 
 ## Struktura
 
 ```
 index.html              kostra stránky (seznam + detail písně)
 assets/styles.css       styly, mobil-first, tmavý režim, tisk
-assets/lib.js           čistá logika (hledání, slugy, sloky) — testovatelná
+assets/lib.js           čistá logika (slugy, dělení na sloky) — testovatelná
 assets/app.js           chování stránky (routing, vykreslování, nastavení)
 data/songs.js           texty písní — jediné, co běžně upravuješ
 icons/                  ikony pro PWA (generuje tools/generate-icons.mjs)
@@ -72,8 +75,8 @@ protože service worker potřebuje http/https).
 node --test
 ```
 
-Kontroluje logiku hledání, skloňování, správnost dat, existenci odkazovaných souborů
-a provázání HTML ↔ JS ↔ CSS.
+Kontroluje logiku (slugy, dělení na sloky), správnost dat, existenci odkazovaných
+souborů a provázání HTML ↔ JS ↔ CSS.
 
 ## Ikony
 

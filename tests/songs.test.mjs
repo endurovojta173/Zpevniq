@@ -1,8 +1,8 @@
 /**
  * Testy zpěvníku — spuštění: node --test
  *
- * Testuje se čistá logika (assets/lib.js) a konzistence dat (data/songs.js),
- * aby překlep v názvu nebo rozbitý slug nešel na GitHub Pages.
+ * Testuje se čistá logika (assets/lib.js), konzistence dat (data/songs.js)
+ * a provázání HTML ↔ JS ↔ CSS, aby chyba nešla na GitHub Pages.
  */
 
 import test from 'node:test';
@@ -48,58 +48,10 @@ test('parseStanzas zvládne prázdný text i Windows konce řádků', () => {
   assert.deepEqual(lib.parseStanzas('a\r\nb\r\n\r\nc'), [['a', 'b'], ['c']]);
 });
 
-const FIXTURE = [
-  {
-    slug: 'vysoky-jalovec',
-    title: 'Vysoký jalovec',
-    author: 'lidová',
-    tags: ['hody'],
-    text: 'Vysoký jalovec, vysoký jako já',
-  },
-  {
-    slug: 'vinecko-bile',
-    title: 'Vinečko bílé',
-    author: 'lidová',
-    tags: ['pomalé'],
-    text: 'Vínečko bílé, jak jsi mně milé',
-  },
-];
-
-test('hledání ignoruje diakritiku i velikost písmen', () => {
-  assert.equal(lib.matches(FIXTURE[0], 'vysoky'), true);
-  assert.equal(lib.matches(FIXTURE[0], 'VYSOKÝ'), true);
-  assert.equal(lib.matches(FIXTURE[1], 'vinecko'), true);
-  assert.equal(lib.matches(FIXTURE[1], 'vino'), false);
-  assert.equal(lib.matches(FIXTURE[0], ''), true);
-});
-
-test('hledání projde i text písně a štítky', () => {
-  assert.equal(lib.matches(FIXTURE[1], 'milé'), true);
-  assert.equal(lib.matches(FIXTURE[1], 'pomale'), true);
-});
-
-test('u více slov musí sedět všechna', () => {
-  assert.equal(lib.matches(FIXTURE[0], 'vysoky jalovec'), true);
-  assert.equal(lib.matches(FIXTURE[0], 'vysoky bile'), false);
-});
-
-test('filterSongs kombinuje hledání a štítek', () => {
-  assert.equal(lib.filterSongs(FIXTURE, { query: 'vinecko' }).length, 1);
-  assert.equal(lib.filterSongs(FIXTURE, { tag: 'hody' }).length, 1);
-  assert.equal(lib.filterSongs(FIXTURE, { tag: 'hody', query: 'bile' }).length, 0);
-  assert.equal(lib.filterSongs(FIXTURE, {}).length, 2);
-});
-
-test('collectTags vrátí unikátní štítky seřazené česky', () => {
-  assert.deepEqual(lib.collectTags(FIXTURE), ['hody', 'pomalé']);
-  assert.deepEqual(lib.collectTags([]), []);
-});
-
-test('formatSongCount skloňuje česky', () => {
-  assert.equal(lib.formatSongCount(0), '0 písní');
-  assert.equal(lib.formatSongCount(1), '1 píseň');
-  assert.equal(lib.formatSongCount(3), '3 písně');
-  assert.equal(lib.formatSongCount(7), '7 písní');
+test('hasText pozná píseň bez textu', () => {
+  assert.equal(lib.hasText({ text: 'Nějaký text' }), true);
+  assert.equal(lib.hasText({ text: '   \n\n ' }), false);
+  assert.equal(lib.hasText({}), false);
 });
 
 /* ---------- Data ---------- */
@@ -151,9 +103,12 @@ test('data: texty neobsahují Windows konce řádků', () => {
 
 /* ---------- Soubory ---------- */
 
+const HTML = readFileSync(join(ROOT, 'index.html'), 'utf8');
+const APP_JS = readFileSync(join(ROOT, 'assets', 'app.js'), 'utf8');
+const CSS = readFileSync(join(ROOT, 'assets', 'styles.css'), 'utf8');
+
 test('index.html odkazuje jen na existující soubory', () => {
-  const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
-  const refs = Array.from(html.matchAll(/(?:src|href)="(\.\/[^"]+)"/g)).map((match) => match[1]);
+  const refs = Array.from(HTML.matchAll(/(?:src|href)="(\.\/[^"]+)"/g)).map((match) => match[1]);
 
   assert.ok(refs.length > 0, 'v index.html nejsou žádné relativní odkazy');
   refs.forEach((ref) => {
@@ -171,6 +126,19 @@ test('manifest odkazuje na existující ikony', () => {
   });
 });
 
+test('barvy v manifestu odpovídají světlému zpěvníku', () => {
+  const manifest = JSON.parse(readFileSync(join(ROOT, 'manifest.webmanifest'), 'utf8'));
+
+  assert.equal(manifest.theme_color, '#fbf7f0');
+  assert.equal(manifest.background_color, '#fbf7f0');
+  assert.ok(
+    HTML.includes('name="theme-color" content="#fbf7f0"'),
+    'theme-color v index.html nesedí s manifestem'
+  );
+  assert.ok(HTML.includes('content="light"'), 'color-scheme má být jen světlý');
+});
+
+
 test('service worker precachuje jen existující soubory', () => {
   const source = readFileSync(join(ROOT, 'sw.js'), 'utf8');
   const urls = Array.from(source.matchAll(/'(\.\/[^']*)'/g)).map((match) => match[1]);
@@ -182,16 +150,10 @@ test('service worker precachuje jen existující soubory', () => {
   });
 });
 
-/* ---------- Provázání HTML, JS a CSS ---------- */
-
-const HTML = readFileSync(join(ROOT, 'index.html'), 'utf8');
-const APP_JS = readFileSync(join(ROOT, 'assets', 'app.js'), 'utf8');
-const CSS = readFileSync(join(ROOT, 'assets', 'styles.css'), 'utf8');
-
 test('app.js hledá jen ID, která v HTML existují', () => {
   const ids = Array.from(APP_JS.matchAll(/\$\('#([a-z0-9-]+)'\)/g)).map((match) => match[1]);
 
-  assert.ok(ids.length > 5, 'v app.js je podezřele málo selektorů');
+  assert.ok(ids.length > 3, 'v app.js je podezřele málo selektorů');
   ids.forEach((id) => {
     assert.ok(HTML.includes('id="' + id + '"'), 'v index.html chybí id="' + id + '"');
   });
@@ -210,9 +172,14 @@ test('třídy vytvářené v app.js mají styly v CSS', () => {
   });
 });
 
-test('HTML nepoužívá zakázané zkratky, které kazí zoom', () => {
+test('HTML nepoužívá zkratky, které kazí zoom', () => {
   assert.ok(!HTML.includes('user-scalable=no'), 'zoom na mobilu musí zůstat povolený');
   assert.ok(!HTML.includes('maximum-scale=1'), 'zoom na mobilu musí zůstat povolený');
 });
 
+test('zpěvník zůstává jen světlý', () => {
+  assert.ok(!CSS.includes('prefers-color-scheme: dark'), 'tmavý režim byl odstraněn, nemá se vracet');
+  assert.ok(!APP_JS.includes('theme'), 'app.js nemá řešit téma');
+  assert.ok(!HTML.includes('theme-toggle'), 'v HTML nemá být přepínač tématu');
+});
 

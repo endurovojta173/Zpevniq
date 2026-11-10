@@ -6,11 +6,9 @@
 (function () {
   'use strict';
 
-  const STORAGE_THEME = 'zpevnik:theme';
   const STORAGE_FONT = 'zpevnik:font';
   const FONT_SIZES = ['small', 'medium', 'large'];
   const DEFAULT_FONT = 'medium';
-  const THEME_COLORS = { light: '#fbf7f0', dark: '#141110' };
   const TITLE = 'Zpěvník';
 
   const $ = function (selector) {
@@ -21,87 +19,32 @@
     viewList: $('#view-list'),
     viewSong: $('#view-song'),
     list: $('#song-list'),
-    empty: $('#empty'),
-    count: $('#count'),
-    search: $('#q'),
-    tags: $('#tags'),
-    themeToggle: $('#theme-toggle'),
-    skipLink: $('.skip-link'),
+    listHeading: $('#list-heading'),
     main: $('#main'),
+    skipLink: $('.skip-link'),
     songTitle: $('#song-title'),
     songMeta: $('#song-meta'),
     songText: $('#song-text'),
     fontButtons: Array.prototype.slice.call(document.querySelectorAll('[data-font-size]')),
   };
 
-  const state = {
-    query: '',
-    tag: '',
-    font: readStorage(STORAGE_FONT, DEFAULT_FONT),
-  };
-
   let firstRoute = true;
 
   /* ------------------------------------------------------------------ *
-   * Úložiště nastavení
+   * Nastavení: velikost písma
    * ------------------------------------------------------------------ */
 
-  function readStorage(key, fallback) {
+  function readFont() {
     try {
-      const value = window.localStorage.getItem(key);
-      return value === null ? fallback : value;
+      const stored = window.localStorage.getItem(STORAGE_FONT);
+      return FONT_SIZES.indexOf(stored) === -1 ? DEFAULT_FONT : stored;
     } catch (error) {
-      return fallback;
+      return DEFAULT_FONT;
     }
   }
-
-  function writeStorage(key, value) {
-    try {
-      window.localStorage.setItem(key, value);
-    } catch (error) {
-      /* soukromý režim nebo plný disk — nastavení prostě nepřežije obnovení */
-    }
-  }
-
-  /* ------------------------------------------------------------------ *
-   * Světlý / tmavý režim
-   * ------------------------------------------------------------------ */
-
-  const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-  function currentTheme() {
-    return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
-  }
-
-  function applyTheme(theme, persist) {
-    const next = theme === 'dark' ? 'dark' : 'light';
-    document.documentElement.dataset.theme = next;
-
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) {
-      meta.setAttribute('content', THEME_COLORS[next]);
-    }
-
-    const label = next === 'dark' ? 'Přepnout na světlý režim' : 'Přepnout na tmavý režim';
-    el.themeToggle.setAttribute('aria-label', label);
-    el.themeToggle.setAttribute('title', label);
-
-    if (persist) {
-      writeStorage(STORAGE_THEME, next);
-    }
-  }
-
-  function toggleTheme() {
-    applyTheme(currentTheme() === 'dark' ? 'light' : 'dark', true);
-  }
-
-  /* ------------------------------------------------------------------ *
-   * Velikost písma
-   * ------------------------------------------------------------------ */
 
   function applyFont(size, persist) {
     const next = FONT_SIZES.indexOf(size) === -1 ? DEFAULT_FONT : size;
-    state.font = next;
     document.documentElement.dataset.font = next;
 
     el.fontButtons.forEach(function (button) {
@@ -109,7 +52,11 @@
     });
 
     if (persist) {
-      writeStorage(STORAGE_FONT, next);
+      try {
+        window.localStorage.setItem(STORAGE_FONT, next);
+      } catch (error) {
+        /* soukromý režim nebo plný disk — nastavení prostě nepřežije obnovení */
+      }
     }
   }
 
@@ -148,10 +95,6 @@
     return { name: 'list' };
   }
 
-  function songHref(song) {
-    return '#/pisen/' + song.slug;
-  }
-
   function metaLine(song) {
     return [song.author].concat(song.tags || []).filter(Boolean).join(' · ');
   }
@@ -166,7 +109,7 @@
 
     const link = document.createElement('a');
     link.className = 'song-link';
-    link.href = songHref(song);
+    link.href = '#/pisen/' + song.slug;
 
     const main = document.createElement('span');
     main.className = 'song-item-main';
@@ -198,59 +141,12 @@
   }
 
   function renderList() {
-    const total = songs().length;
-    const visible = ZpevnikLib.filterSongs(songs(), { query: state.query, tag: state.tag });
-
-    el.list.replaceChildren.apply(el.list, visible.map(createSongItem));
-
-    el.count.textContent = visible.length === total && !state.query && !state.tag
-      ? ZpevnikLib.formatSongCount(total)
-      : 'Nalezeno: ' + ZpevnikLib.formatSongCount(visible.length);
-
-    const isFiltered = Boolean(state.query || state.tag);
-    el.empty.hidden = visible.length > 0;
-    el.empty.textContent = isFiltered
-      ? 'Nic jsme nenašli. Zkus jiné slovo nebo zruš filtr.'
-      : 'Zpěvník je zatím prázdný.';
-  }
-
-  function renderTags() {
-    const tags = ZpevnikLib.collectTags(songs());
-    el.tags.replaceChildren();
-
-    // Jeden štítek nemá cenu filtrovat — lišta se schová.
-    if (tags.length < 2) {
-      el.tags.hidden = true;
-      return;
-    }
-
-    el.tags.hidden = false;
-    el.tags.appendChild(createTagButton('Vše', ''));
-    tags.forEach(function (tag) {
-      el.tags.appendChild(createTagButton(tag, tag));
-    });
-  }
-
-  function createTagButton(label, tag) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'tag';
-    button.textContent = label;
-    button.dataset.tag = tag;
-    button.setAttribute('aria-pressed', String(state.tag === tag));
-    button.addEventListener('click', function () {
-      state.tag = tag;
-      renderTags();
-      renderList();
-    });
-    return button;
+    el.list.replaceChildren.apply(el.list, songs().map(createSongItem));
   }
 
   /* ------------------------------------------------------------------ *
    * Vykreslení jedné písně
    * ------------------------------------------------------------------ */
-
-  const listHeading = $('#list-heading');
 
   function renderLyrics(song) {
     el.songText.replaceChildren();
@@ -315,8 +211,8 @@
     document.title = TITLE;
     window.scrollTo(0, 0);
 
-    if (focusHeading && listHeading) {
-      listHeading.focus({ preventScroll: true });
+    if (focusHeading && el.listHeading) {
+      el.listHeading.focus({ preventScroll: true });
     }
   }
 
@@ -343,22 +239,6 @@
    * ------------------------------------------------------------------ */
 
   function wireEvents() {
-    el.search.addEventListener('input', function () {
-      state.query = el.search.value;
-      renderList();
-    });
-
-    el.search.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && el.search.value) {
-        event.preventDefault();
-        el.search.value = '';
-        state.query = '';
-        renderList();
-      }
-    });
-
-    el.themeToggle.addEventListener('click', toggleTheme);
-
     el.fontButtons.forEach(function (button) {
       button.addEventListener('click', function () {
         applyFont(button.dataset.fontSize, true);
@@ -376,19 +256,6 @@
           el.main.scrollIntoView({ block: 'start' });
         }
       });
-    }
-
-    // Bez ruční volby tématu se držíme systémového nastavení.
-    const onSystemThemeChange = function () {
-      if (!readStorage(STORAGE_THEME, '')) {
-        applyTheme(darkModeQuery.matches ? 'dark' : 'light', false);
-      }
-    };
-
-    if (typeof darkModeQuery.addEventListener === 'function') {
-      darkModeQuery.addEventListener('change', onSystemThemeChange);
-    } else if (typeof darkModeQuery.addListener === 'function') {
-      darkModeQuery.addListener(onSystemThemeChange);
     }
   }
 
@@ -409,9 +276,7 @@
   }
 
   function init() {
-    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light', false);
-    applyFont(state.font, false);
-    renderTags();
+    applyFont(readFont(), false);
     renderList();
     renderRoute();
     wireEvents();
@@ -420,5 +285,4 @@
 
   init();
 })();
-
 
