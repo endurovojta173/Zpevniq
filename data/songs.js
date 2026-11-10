@@ -92,7 +92,34 @@ vy budete plakat, my budeme skákat v břeclavské hospodě při muzice.
     title: 'Nedaleko od Trenčína',
     author: 'lidová',
     tags: ['hody'],
-    text: '',
+    text: `
+Nedaleko od Trenčína,
+bývá mladá Kateřina,
+
+Nedaleko od Trenčína,
+bývá mladá Kateřina.
+
+Černé oči má, to musí být má milá,
+takú frajárečku já chcem, co má jméno Kateřina.
+
+My jsme chlapci od dědiny,
+milujeme Kateřiny,
+
+My jsme chlapci od dědiny,
+milujeme Kateřiny.
+
+Černé oči má, to musí být má milá,
+takú frajárečku já chcem, co má jméno Kateřina.
+
+Takú frajárku sem dostal,
+jako by ju sám čert poslal,
+
+Takú frajárku sem dostal,
+jako by ju sám čert poslal.
+
+Černé oči má, to musí být má milá,
+takú frajárečku já chcem, co má jméno Kateřina.
+`,
   },
   {
     slug: 'kdyby-byla-morava',
