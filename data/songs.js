@@ -175,6 +175,43 @@ budu vás pít, co budu žít, vínečka obě,
 budu vás pít, co budu žít, vínečka obě.
 `,
   },
+  {
+    slug: 'studentska-halenka',
+    title: 'Studentská halenka',
+    author: 'lidová',
+    tags: ['hody'],
+    text: `
+Studentská halenka, ta je tuze tenká,
+podňů se vyspala, poctivost ztratila, nejedna panenka,
+Studentská halenka, ta je tuze tenká,
+podňů se vyspala, poctivost ztratila, nejedna panenka.
+
+Nejedna panenka, nejeden mládenec,
+který tu panenku, poctivou frajárku, připravil o věnec,
+Nejedna panenka, nejeden mládenec,
+který tu panenku, poctivou frajárku, připravil o věnec.
+
+Nežel holka, nežel, že jsem s tebou ležel,
+já ležel na seně vožralej jak štěně, já o tom nevěděl,
+Nežel holka, nežel, že jsem s tebou ležel,
+já ležel na seně vožralej jak štěně, já o tom nevěděl.
+
+Dalas přes mě nožku, už sme byli v rožku,
+dalas přes mě obě, už sme byli v sobě, chvála panu bohu,
+Dalas přes mě nožku, už sme byli v rožku,
+dalas přes mě obě, už sme byli v sobě, chvála panu bohu.
+
+Kdyby se poctivost na poli rodila,
+nejedna panenka, poctivá frajárka, by pro ňu chodila,
+Kdyby se poctivost na poli rodila,
+nejedna panenka, poctivá frajárka, by pro ňu chodila.
+
+Ale že poctivost se v poli nerodí,
+nejedna panenka, poctivá frajárka, předčasně porodí,
+Ale že poctivost se v poli nerodí,
+nejedna panenka, poctivá frajárka, předčasně porodí.
+`,
+  },
 ];
 
 /*
