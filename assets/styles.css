@@ -339,6 +339,10 @@ main:focus {
   color: var(--muted);
 }
 
+.song-meta:empty {
+  display: none;
+}
+
 .lyrics {
   margin-top: 1.75rem;
   font-size: var(--lyrics-size);

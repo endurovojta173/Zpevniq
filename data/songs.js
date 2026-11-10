@@ -4,7 +4,7 @@
  * JAK PŘIDAT PÍSEŇ
  *   1. Zkopíruj šablonu na konci souboru.
  *   2. Vyplň slug (malá písmena, bez diakritiky, pomlčky místo mezer),
- *      title, author, tags a text.
+ *      title a text (author a tags jsou volitelné).
  *   3. Do `text` piš písničku tak, jak se zpívá. Prázdný řádek = nová sloka.
  *   4. Ulož soubor a obnov stránku v prohlížeči.
  *
@@ -15,8 +15,6 @@ const SONGS = [
   {
     slug: 'na-pankraci',
     title: 'Na Pankráci',
-    author: 'lidová',
-    tags: ['hody'],
     text: `
 |: Na Pankráci na malém vršíčku, stojí pěkné stromořadí, :|
 |: měl jsem holku namluvenou, ale jinej mě za ní chodí. :|
@@ -31,8 +29,6 @@ const SONGS = [
   {
     slug: 'co-jste-hasici',
     title: 'Co jste hasiči',
-    author: 'lidová',
-    tags: ['hody'],
     text: `
 Co jste hasiči, co jste dělali,
 |: že jste nám ten pivo, pivo, pivovárek shořet nechali. :|
@@ -47,8 +43,6 @@ Vodu nepijem, my pijeme rum,
   {
     slug: 'vysoky-jalovec',
     title: 'Vysoký jalovec',
-    author: 'lidová',
-    tags: ['hody'],
     text: `
 Vysoký jalovec, vysoký ako ja,
 preskoč ho má milá rovnýma nohama.
@@ -86,8 +80,6 @@ na teba šuhajko zapomenúť musím.
   {
     slug: 'breclavska-kasarna',
     title: 'Břeclavská kasárna',
-    author: 'lidová',
-    tags: ['hody'],
     text: `
 Břeclavská kasárňa malovaná, malujů ju chlapci se šavlama.
 |: Chlapci se šavlama, děvčata slzama, břeclavská kasárňa malovaná. :|
@@ -102,8 +94,6 @@ Počkajte děvčata tři měsíce, bude nás rukovat na tisíce.
   {
     slug: 'nedaleko-od-trencina',
     title: 'Nedaleko od Trenčína',
-    author: 'lidová',
-    tags: ['hody'],
     text: `
 |: Nedaleko od Trenčína, bývá mladá Kateřina. :|
 
@@ -124,8 +114,6 @@ takú frajárečku já chcem, co má jméno Kateřina.
   {
     slug: 'kdyby-byla-morava',
     title: 'Kdyby byla Morava',
-    author: 'lidová',
-    tags: ['hody'],
     text: `
 Kdyby byla Morava jako je Slezko,
 dala bych ti huběnku, až by to plesklo,
@@ -151,8 +139,6 @@ ošidila dcérečka synečka. :|
   {
     slug: 'vinecko-bile',
     title: 'Vínečko bílé',
-    author: 'lidová',
-    tags: ['hody'],
     text: `
 Vínečko bílé, si od mé milé,
 |: budu ťa pít, co budu žít, vínečko bílé. :|
@@ -167,8 +153,6 @@ Vínečka obě, frajárky moje,
   {
     slug: 'studentska-halenka',
     title: 'Studentská halenka',
-    author: 'lidová',
-    tags: ['hody'],
     text: `
 |: Studentská halenka, ta je tuze tenká,
 podňů se vyspala, poctivost ztratila, nejedna panenka. :|
@@ -197,8 +181,6 @@ nejedna panenka, poctivá frajárka, předčasně porodí. :|
  *  {
  *    slug: 'jmena-pisne',
  *    title: 'Jméno písně',
- *    author: 'lidová',
- *    tags: ['hody'],
  *    text: `
  * První řádek první sloky,
  * druhý řádek první sloky.

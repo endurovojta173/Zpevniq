@@ -67,11 +67,12 @@ test('data: každá píseň má povinné údaje', () => {
       'píseň bez názvu: ' + song.slug
     );
     assert.equal(typeof song.text, 'string', 'text musí být řetězec: ' + song.title);
-    assert.ok(Array.isArray(song.tags), 'tagy musí být pole: ' + song.title);
-
-    song.tags.forEach((tag) => {
-      assert.ok(typeof tag === 'string' && tag.trim().length > 0, 'prázdný štítek: ' + song.title);
-    });
+    if (song.tags !== undefined) {
+      assert.ok(Array.isArray(song.tags), 'tagy musí být pole: ' + song.title);
+      song.tags.forEach((tag) => {
+        assert.ok(typeof tag === 'string' && tag.trim().length > 0, 'prázdný štítek: ' + song.title);
+      });
+    }
   });
 });
 
