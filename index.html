@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zpěvník</title>
+    <meta name="description" content="Zpěvník lidových a hodových písní — texty na mobil, funguje i bez signálu." />
+    <meta name="theme-color" content="#fbf7f0" />
+    <meta name="color-scheme" content="light dark" />
+
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/icon-180.png" />
+
+    <script>
+      // Téma a velikost písma nastavíme dřív, než se stránka vykreslí — žádné blikání.
+      (function () {
+        try {
+          var theme = localStorage.getItem('zpevnik:theme');
+          if (theme !== 'dark' && theme !== 'light') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.dataset.theme = theme;
+
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute('content', theme === 'dark' ? '#141110' : '#fbf7f0');
+          }
+
+          var font = localStorage.getItem('zpevnik:font');
+          if (font === 'small' || font === 'medium' || font === 'large') {
+            document.documentElement.dataset.font = font;
+          }
+        } catch (error) {
+          /* soukromý režim bez localStorage — jede se na výchozí hodnoty */
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Přeskočit na obsah</a>
+
+    <header class="site-header">
+      <div class="bar">
+        <a class="brand" href="#/">Zpěvník</a>
+
+        <button class="icon-button" type="button" id="theme-toggle" aria-label="Přepnout na tmavý režim">
+          <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+          </svg>
+          <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section id="view-list" aria-labelledby="list-heading">
+        <h1 class="sr-only" id="list-heading" tabindex="-1">Zpěvník</h1>
+
+        <div class="search-row">
+          <label class="sr-only" for="q">Hledat píseň</label>
+          <input
+            class="search-input"
+            id="q"
+            type="search"
+            name="q"
+            placeholder="Hledat píseň…"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            enterkeyhint="search"
+          />
+          <p class="count" id="count" aria-live="polite"></p>
+        </div>
+
+        <nav class="tags" id="tags" aria-label="Filtr podle štítků"></nav>
+
+        <ul class="song-list" id="song-list"></ul>
+
+        <p class="empty" id="empty" hidden></p>
+
+        <noscript>
+          <p class="notice">Zpěvník potřebuje zapnutý JavaScript. Zapni ho prosím v nastavení prohlížeče a obnov stránku.</p>
+        </noscript>
+      </section>
+
+      <article id="view-song" aria-labelledby="song-title" hidden>
+        <div class="song-nav">
+          <a class="back-link" href="#/">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M19 12H5M11 18l-6-6 6-6" />
+            </svg>
+            Zpěvník
+          </a>
+
+          <div class="font-controls" role="group" aria-label="Velikost písma">
+            <button class="font-button" type="button" data-font-size="small" aria-pressed="false" aria-label="Malé písmo">
+              A
+            </button>
+            <button class="font-button" type="button" data-font-size="medium" aria-pressed="true" aria-label="Střední písmo">
+              A
+            </button>
+            <button class="font-button" type="button" data-font-size="large" aria-pressed="false" aria-label="Velké písmo">
+              A
+            </button>
+          </div>
+        </div>
+
+        <h1 class="song-title" id="song-title" tabindex="-1"></h1>
+        <p class="song-meta" id="song-meta"></p>
+        <div class="lyrics" id="song-text"></div>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <p>Texty lidových písní. Přidej si zpěvník na plochu a funguje i bez signálu.</p>
+    </footer>
+
+    <script src="./data/songs.js"></script>
+    <script src="./assets/lib.js"></script>
+    <script src="./assets/app.js"></script>
+  </body>
+</html>

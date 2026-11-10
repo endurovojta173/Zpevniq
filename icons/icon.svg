@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Zpěvník">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a2551d" />
+      <stop offset="1" stop-color="#6b3210" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="113" ry="113" fill="url(#bg)" />
+  <g fill="#fff6ea">
+    <ellipse cx="184" cy="358" rx="77" ry="59" />
+    <rect x="243" y="113" width="26" height="245" rx="13" />
+    <path d="M269 120 q100 13 140 95 q-40 -52 -140 -62 z" />
+  </g>
+</svg>

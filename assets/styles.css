@@ -1,0 +1,637 @@
+/* =====================================================================
+   Zpěvník — styly
+   Mobil na prvním místě, žádný externí font, světlý i tmavý režim.
+   ===================================================================== */
+
+:root {
+  --bg: #fbf7f0;
+  --surface: #ffffff;
+  --text: #1f1a16;
+  --muted: #6d6055;
+  --line: #e6ddcf;
+  --accent: #9a4a16;
+  --accent-soft: #f4e5d4;
+  --on-accent: #ffffff;
+  --focus: #1f5fbf;
+  --radius: 12px;
+  --max-width: 44rem;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #141110;
+  --surface: #1e1a17;
+  --text: #f2ece3;
+  --muted: #b5a898;
+  --line: #332c26;
+  --accent: #f0a868;
+  --accent-soft: #2c231c;
+  --on-accent: #241a11;
+  --focus: #8ab4ff;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(154, 74, 22, 0.15);
+}
+
+/* Barva označení textu v tmavém režimu nesmí být nečitelná. */
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+h1,
+h2,
+p,
+ul {
+  margin: 0;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- Skryté, ale čitelné pro čtečky ---------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Skip link ---------- */
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0.5rem;
+  z-index: 20;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* ---------- Hlavička ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding-top: env(safe-area-inset-top);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+@supports (backdrop-filter: blur(8px)) {
+  .site-header {
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+  }
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding: 0.5rem 1rem;
+}
+
+.brand {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.5rem 0.25rem;
+  border-radius: 8px;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.icon-button:hover {
+  border-color: var(--accent);
+}
+
+.icon-button:active {
+  background: var(--accent-soft);
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+/* Ikona slunce je vidět v tmavém režimu, měsíc ve světlém. */
+.icon-moon {
+  display: block;
+}
+
+.icon-sun {
+  display: none;
+}
+
+:root[data-theme='dark'] .icon-moon {
+  display: none;
+}
+
+:root[data-theme='dark'] .icon-sun {
+  display: block;
+}
+
+/* ---------- Obsah ---------- */
+
+main {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding: 1rem 1rem 3rem;
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+main:focus {
+  outline: none;
+}
+
+/* ---------- Hledání ---------- */
+
+.search-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 0.875rem;
+}
+
+.search-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.15s ease;
+}
+
+.search-input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.search-input:hover {
+  border-color: var(--muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+/* Výchozí křížek pro vymazání v prohlížeči schováme, máme vlastní chování. */
+.search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.count {
+  font-size: 0.875rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Štítky ---------- */
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tag {
+  min-height: 40px;
+  padding: 0.5rem 0.9375rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.tag:hover {
+  border-color: var(--accent);
+}
+
+.tag[aria-pressed='true'] {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------- Seznam písní ---------- */
+
+.song-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.song-item {
+  min-width: 0;
+}
+
+.song-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 56px;
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.song-link:hover {
+  border-color: var(--accent);
+}
+
+.song-link:active {
+  background: var(--accent-soft);
+}
+
+/* Šipka vpravo, aby bylo jasné, že se dá klepnout. */
+.song-link::after {
+  content: '›';
+  margin-left: auto;
+  font-size: 1.375rem;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.song-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.song-item-title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.song-item-meta {
+  font-size: 0.875rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  flex: none;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 2.5rem 1rem;
+  color: var(--muted);
+  text-align: center;
+  text-wrap: pretty;
+}
+
+/* ---------- Detail písně ---------- */
+
+.song-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 44px;
+  padding: 0.25rem 0.5rem 0.25rem 0;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.back-link .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.font-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.1875rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.font-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 40px;
+  padding: 0;
+  font: inherit;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.font-button:hover {
+  color: var(--text);
+}
+
+.font-button[aria-pressed='true'] {
+  color: var(--on-accent);
+  background: var(--accent);
+  font-weight: 700;
+}
+
+.font-button[data-font-size='small'] {
+  font-size: 0.8125rem;
+}
+
+.font-button[data-font-size='medium'] {
+  font-size: 1rem;
+}
+
+.font-button[data-font-size='large'] {
+  font-size: 1.1875rem;
+}
+
+.song-title {
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* Nadpis dostává fokus po přechodu na píseň — obrys jen pro klávesnici. */
+.song-title:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.song-meta {
+  margin-top: 0.375rem;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+
+/* ---------- Text písně ---------- */
+
+.lyrics {
+  margin-top: 1.75rem;
+  font-size: var(--lyrics-size, 1.1875rem);
+  line-height: 1.7;
+  overflow-wrap: break-word;
+}
+
+:root[data-font='small'] {
+  --lyrics-size: 1rem;
+}
+
+:root[data-font='medium'] {
+  --lyrics-size: 1.1875rem;
+}
+
+:root[data-font='large'] {
+  --lyrics-size: 1.4375rem;
+}
+
+.stanza {
+  white-space: pre-line;
+  text-wrap: pretty;
+}
+
+.stanza + .stanza {
+  margin-top: 1.375em;
+}
+
+.notice {
+  padding: 1rem 1.25rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  text-wrap: pretty;
+}
+
+/* ---------- Patička ---------- */
+
+.site-footer {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding: 1.5rem 1rem calc(2rem + env(safe-area-inset-bottom));
+  color: var(--muted);
+  font-size: 0.8125rem;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+/* ---------- Větší obrazovky ---------- */
+
+@media (min-width: 40rem) {
+  main {
+    padding-top: 1.5rem;
+  }
+
+  .song-link {
+    padding: 1rem 1.25rem;
+  }
+}
+
+/* ---------- Respektuj omezení pohybu ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Tisk / PDF ---------- */
+
+@media print {
+  :root,
+  :root[data-theme='dark'] {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --text: #000000;
+    --muted: #444444;
+    --line: #bbbbbb;
+    --accent: #000000;
+    --accent-soft: #ffffff;
+    --on-accent: #ffffff;
+    --lyrics-size: 11pt;
+    color-scheme: light;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+    font-size: 11pt;
+  }
+
+  .site-header,
+  .site-footer,
+  .skip-link,
+  .search-row,
+  .tags,
+  .song-nav,
+  .badge,
+  .notice {
+    display: none !important;
+  }
+
+  main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .song-title {
+    font-size: 17pt;
+  }
+
+  .song-meta {
+    margin-top: 0.25rem;
+    font-size: 10pt;
+  }
+
+  .lyrics {
+    margin-top: 0.75rem;
+    font-size: 11pt;
+    line-height: 1.45;
+  }
+
+  .stanza {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .song-list {
+    gap: 0;
+  }
+
+  .song-link {
+    border: 0;
+    border-bottom: 1px solid #dddddd;
+    border-radius: 0;
+    padding: 0.35rem 0;
+    min-height: 0;
+  }
+
+  .song-link::after {
+    content: none;
+  }
+
+  a {
+    color: #000000;
+    text-decoration: none;
+  }
+}
+
+
