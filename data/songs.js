@@ -50,7 +50,7 @@ Ja ho nepreskočím, ja sa rada točím,
 na teba šuhajko zapomenúť musím.
 
 Uvázali kozu u tr tr tr, u tr tr tr.
-Uvázali kozu u drna.
+Uvázali kozu u trna.
 Ona sa im v noci u tr tr tr, u tr tr tr.
 Ona sa im v noci utrhla.
 
@@ -60,7 +60,7 @@ Ja ho nepreskočím, ja sa rada točím,
 na teba šuhajko zapomenúť musím.
 
 Uvázali kozu u tr tr tr, u tr tr tr.
-Uvázali kozu u drna.
+Uvázali kozu u trna.
 Ona sa im v noci u tr tr tr, u tr tr tr.
 Ona sa im v noci utrhla.
 
