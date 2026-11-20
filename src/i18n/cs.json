@@ -1,0 +1,8 @@
+{
+  "app": {
+    "name": "Zpevniq",
+    "subtitle": "Offline-first zpěvník ve formátu ChordPro",
+    "platformMobile": "Nativní mobilní režim (klientské vyhledávání povoleno)",
+    "platformWeb": "Webový režim (import souborů a synchronizace)"
+  }
+}

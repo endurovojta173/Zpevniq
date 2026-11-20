@@ -73,6 +73,8 @@ src/
 
 ## Getting Started
 
+> Need full machine setup instructions (Node, JDK 21, Android SDK/CLI emulator, and macOS/iOS)? See [setup.md](./setup.md).
+
 ```bash
 # Install dependencies
 npm install

@@ -1,0 +1,8 @@
+{
+  "app": {
+    "name": "Zpevniq",
+    "subtitle": "Offline-first ChordPro songbook",
+    "platformMobile": "Native mobile mode (client-side search enabled)",
+    "platformWeb": "Web mode (file import and cloud sync)"
+  }
+}
