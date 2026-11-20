@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { SavedSong } from '../core/types/song';
 import cs from '../i18n/cs.json';
+import { platform } from '../services/platform';
+import { getProviderById } from '../services/scrapers/registry';
 import { SongPreview } from './SongPreview';
 
 export interface SavedSongsPanelProps {
@@ -11,23 +13,31 @@ export interface SavedSongsPanelProps {
   readonly isLoading: boolean;
   readonly error: string | null;
   readonly discoverLabel: string;
+  readonly isStageMode?: boolean;
+  readonly onToggleStageMode?: () => void;
+  readonly onSongOpenChange?: (isOpen: boolean) => void;
   readonly onDeleteSong: (id: string) => Promise<void>;
   readonly onSwitchToDiscover: () => void;
 }
 
-const PROVIDER_DISPLAY_NAMES: Readonly<Record<string, string>> = {
-  velkyzpevnik: 'Velký zpěvník',
-  akordykytary: 'Akordy Kytary.cz',
-  chordie: 'Chordie',
-  guitaretab: 'GuitareTab',
-  'local-file': cs.library.localSource,
-};
-
 function formatSourceLabel(sourceProvider: string | null): string {
-  if (!sourceProvider) {
+  if (!sourceProvider || sourceProvider === 'local-file') {
     return cs.library.localSource;
   }
-  return PROVIDER_DISPLAY_NAMES[sourceProvider] ?? sourceProvider;
+  return getProviderById(sourceProvider)?.name ?? sourceProvider;
+}
+
+function LibrarySkeleton() {
+  return (
+    <div aria-busy="true" aria-label={cs.library.loading} className="flex flex-col gap-2">
+      {[0, 1, 2, 3].map((idx) => (
+        <div
+          key={idx}
+          className="h-16 w-full rounded-2xl border border-outline-variant bg-surface-container-low motion-safe:animate-pulse"
+        />
+      ))}
+    </div>
+  );
 }
 
 export function SavedSongsPanel({
@@ -38,6 +48,9 @@ export function SavedSongsPanel({
   isLoading,
   error,
   discoverLabel,
+  isStageMode = false,
+  onToggleStageMode,
+  onSongOpenChange,
   onDeleteSong,
   onSwitchToDiscover,
 }: SavedSongsPanelProps) {
@@ -49,6 +62,11 @@ export function SavedSongsPanel({
   const selectedSong = selectedSongId
     ? savedSongs.find((song) => song.id === selectedSongId) ?? null
     : null;
+
+  useEffect(() => {
+    onSongOpenChange?.(Boolean(selectedSong));
+    return () => onSongOpenChange?.(false);
+  }, [selectedSong, onSongOpenChange]);
 
   const handleDeleteSelected = async () => {
     if (!selectedSong) {
@@ -77,6 +95,8 @@ export function SavedSongsPanel({
         isSaved
         isSaving={isDeleting}
         saveError={deleteError}
+        isStageMode={isStageMode}
+        onToggleStageMode={onToggleStageMode}
         onDelete={() => {
           void handleDeleteSelected();
         }}
@@ -90,10 +110,7 @@ export function SavedSongsPanel({
 
   return (
     <section className="flex w-full flex-col">
-      <div
-        className="sticky top-0 z-20 border-b border-neutral-800/80 bg-neutral-950/95 px-4 pb-3 backdrop-blur-md"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
-      >
+      <div className="sticky top-0 z-20 border-b border-outline-variant chrome-bar pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3 pl-[calc(env(safe-area-inset-left)+1rem)] pr-[calc(env(safe-area-inset-right)+1rem)]">
         <div className="mx-auto w-full max-w-2xl">
           <div className="relative flex items-center">
             <svg
@@ -103,7 +120,7 @@ export function SavedSongsPanel({
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="pointer-events-none absolute left-3.5 h-4 w-4 text-neutral-500"
+              className="pointer-events-none absolute left-4 h-4 w-4 text-on-surface-variant"
               aria-hidden="true"
             >
               <circle cx="11" cy="11" r="7" />
@@ -118,19 +135,20 @@ export function SavedSongsPanel({
               placeholder={cs.library.searchPlaceholder}
               aria-label={cs.library.searchPlaceholder}
               autoComplete="off"
-              className={`w-full rounded-xl border border-neutral-700 bg-neutral-900 py-2.5 pl-10 text-base text-white placeholder-neutral-500 outline-none focus:border-amber-500 ${
-                libraryQuery.length > 0 ? 'pr-10' : 'pr-4'
+              className={`min-h-12 w-full rounded-full border border-outline-variant bg-surface-container py-2.5 pl-11 text-base text-on-surface placeholder-on-surface-variant outline-none transition-colors focus:border-primary ${
+                libraryQuery.length > 0 ? 'pr-12' : 'pr-4'
               }`}
             />
             {libraryQuery.length > 0 ? (
               <button
                 type="button"
                 onClick={() => {
+                  platform.hapticTap();
                   onLibraryQueryChange('');
                   inputRef.current?.focus();
                 }}
                 aria-label={cs.search.clear}
-                className="absolute right-2 rounded-lg px-2 py-1 text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+                className="absolute right-0 inline-flex h-12 w-12 items-center justify-center rounded-full text-lg font-medium text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface"
               >
                 ×
               </button>
@@ -139,31 +157,39 @@ export function SavedSongsPanel({
         </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pt-4">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 pt-4 pl-[calc(env(safe-area-inset-left)+1rem)] pr-[calc(env(safe-area-inset-right)+1rem)]">
         {error ? (
-          <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <div
+            role="alert"
+            className="rounded-2xl border border-error/40 bg-error-container px-4 py-3 text-sm font-medium text-on-error-container"
+          >
             {cs.library.loadError}
           </div>
         ) : null}
 
         {isLoading && totalSavedCount === 0 ? (
-          <p className="py-10 text-center text-sm text-neutral-400">{cs.library.loading}</p>
+          <LibrarySkeleton />
         ) : totalSavedCount === 0 ? (
-          <div className="mt-4 flex flex-col items-center gap-4 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-center">
-            <h2 className="text-lg font-semibold text-white">{cs.library.emptyTitle}</h2>
-            <p className="text-sm leading-relaxed text-neutral-400">
+          <div className="mt-4 flex flex-col items-center gap-4 rounded-2xl border border-outline-variant bg-surface-container-low p-6 text-center">
+            <h2 className="text-lg font-semibold text-on-surface">{cs.library.emptyTitle}</h2>
+            <p className="text-sm leading-relaxed text-on-surface-variant">
               {cs.library.emptyDescription}
             </p>
             <button
               type="button"
-              onClick={onSwitchToDiscover}
-              className="mt-1 rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-amber-400"
+              onClick={() => {
+                platform.hapticTap();
+                onSwitchToDiscover();
+              }}
+              className="mt-1 inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-on-primary transition-transform duration-150 hover:brightness-110 active:scale-[0.98]"
             >
               {discoverLabel}
             </button>
           </div>
         ) : savedSongs.length === 0 ? (
-          <p className="py-8 text-center text-sm text-neutral-500">{cs.library.noMatches}</p>
+          <p className="py-10 text-center text-sm text-on-surface-variant">
+            {cs.library.noMatches}
+          </p>
         ) : (
           <div className="flex flex-col gap-2">
             {savedSongs.map((song) => (
@@ -171,24 +197,25 @@ export function SavedSongsPanel({
                 key={song.id}
                 type="button"
                 onClick={() => {
+                  platform.hapticTap();
                   setDeleteError(null);
                   setSelectedSongId(song.id);
                 }}
-                className="flex w-full items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/70 px-4 py-3 text-left transition hover:border-neutral-700 hover:bg-neutral-900 active:scale-[0.99]"
+                className="flex min-h-16 w-full items-center justify-between gap-3 rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-3 text-left select-none transition-colors duration-150 hover:bg-surface-container active:scale-[0.99]"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-neutral-100">{song.title}</p>
+                  <p className="truncate font-semibold text-on-surface">{song.title}</p>
                   {song.artist ? (
-                    <p className="truncate text-sm text-neutral-400">{song.artist}</p>
+                    <p className="truncate text-sm text-on-surface-variant">{song.artist}</p>
                   ) : null}
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   {song.key ? (
-                    <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-300">
+                    <span className="rounded-lg border border-primary/35 bg-primary-container px-2 py-0.5 text-[11px] font-semibold text-on-primary-container">
                       {song.key}
                     </span>
                   ) : null}
-                  <span className="rounded-md border border-neutral-700 bg-neutral-800 px-2 py-0.5 text-[11px] font-medium text-neutral-300">
+                  <span className="rounded-lg border border-outline-variant bg-surface-container px-2 py-0.5 text-[11px] font-medium text-on-surface-variant">
                     {formatSourceLabel(song.sourceProvider)}
                   </span>
                 </div>

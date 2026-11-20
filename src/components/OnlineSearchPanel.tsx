@@ -1,4 +1,4 @@
-import { type FormEvent, useRef, useState } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import type {
   ProviderSearchStatus,
   ScraperErrorCode,
@@ -7,10 +7,14 @@ import type {
 import type { SaveSongInput, SavedSong } from '../core/types/song';
 import { useSongSearch } from '../hooks/useSongSearch';
 import cs from '../i18n/cs.json';
+import { platform } from '../services/platform';
 import { SongPreview } from './SongPreview';
 
 export interface OnlineSearchPanelProps {
   readonly findSavedSong: (sourceUrl?: string | null, id?: string | null) => SavedSong | undefined;
+  readonly isStageMode?: boolean;
+  readonly onToggleStageMode?: () => void;
+  readonly onSongOpenChange?: (isOpen: boolean) => void;
   readonly onSaveSong: (input: SaveSongInput) => Promise<SavedSong>;
   readonly onDeleteSong: (id: string) => Promise<void>;
 }
@@ -22,8 +26,8 @@ function getErrorMessage(code: ScraperErrorCode): string {
 function ProviderStatusPill({ status }: { readonly status: ProviderSearchStatus }) {
   if (status.status === 'loading') {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-700 bg-neutral-900 px-2.5 py-1 text-xs text-neutral-300">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant bg-surface-container px-3 py-1 text-xs text-on-surface-variant">
+        <span className="h-1.5 w-1.5 rounded-full bg-primary motion-safe:animate-pulse" />
         {status.providerName}: {cs.search.providerStatus.loading}
       </span>
     );
@@ -33,17 +37,17 @@ function ProviderStatusPill({ status }: { readonly status: ProviderSearchStatus 
     return (
       <span
         title={getErrorMessage(status.error.code)}
-        className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-2.5 py-1 text-xs text-red-300"
+        className="inline-flex items-center gap-1.5 rounded-full border border-error/40 bg-error-container px-3 py-1 text-xs text-on-error-container"
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+        <span className="h-1.5 w-1.5 rounded-full bg-error" />
         {status.providerName}: {getErrorMessage(status.error.code)}
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-success/40 bg-success-container px-3 py-1 text-xs text-on-success-container tabular-nums">
+      <span className="h-1.5 w-1.5 rounded-full bg-success" />
       {status.providerName}: {status.resultCount} {cs.search.providerStatus.resultsSuffix}
     </span>
   );
@@ -61,25 +65,28 @@ function SearchResultRow({
   return (
     <button
       type="button"
-      onClick={() => onSelect(result)}
-      className="flex w-full items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/70 px-4 py-3 text-left transition hover:border-neutral-700 hover:bg-neutral-900 active:scale-[0.99]"
+      onClick={() => {
+        platform.hapticTap();
+        onSelect(result);
+      }}
+      className="flex min-h-16 w-full items-center justify-between gap-3 rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-3 text-left select-none transition-colors duration-150 hover:bg-surface-container active:scale-[0.99]"
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate font-medium text-neutral-100">{result.title}</p>
+          <p className="truncate font-semibold text-on-surface">{result.title}</p>
           {isSaved ? (
-            <span className="shrink-0 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+            <span className="shrink-0 rounded-full border border-success/40 bg-success-container px-2 py-0.5 text-[10px] font-semibold text-on-success-container">
               {cs.search.savedBadge}
             </span>
           ) : null}
         </div>
-        <p className="truncate text-sm text-neutral-400">{result.artist}</p>
+        <p className="truncate text-sm text-on-surface-variant">{result.artist}</p>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
-        <span className="rounded-md border border-neutral-700 bg-neutral-800 px-2 py-0.5 text-[11px] font-medium text-neutral-300">
+        <span className="rounded-lg border border-outline-variant bg-surface-container px-2 py-0.5 text-[11px] font-medium text-on-surface-variant">
           {result.providerName}
         </span>
-        <span className="text-[11px] text-neutral-500">
+        <span className="text-[11px] text-on-surface-variant">
           {cs.search.matchType[result.matchType]}
         </span>
       </div>
@@ -87,8 +94,24 @@ function SearchResultRow({
   );
 }
 
+function SearchResultsSkeleton() {
+  return (
+    <div aria-busy="true" aria-label={cs.search.searching} className="flex flex-col gap-2">
+      {[0, 1, 2, 3].map((idx) => (
+        <div
+          key={idx}
+          className="h-16 w-full rounded-2xl border border-outline-variant bg-surface-container-low motion-safe:animate-pulse"
+        />
+      ))}
+    </div>
+  );
+}
+
 export function OnlineSearchPanel({
   findSavedSong,
+  isStageMode = false,
+  onToggleStageMode,
+  onSongOpenChange,
   onSaveSong,
   onDeleteSong,
 }: OnlineSearchPanelProps) {
@@ -115,11 +138,17 @@ export function OnlineSearchPanel({
     retrySelectedResult,
   } = useSongSearch();
 
+  useEffect(() => {
+    onSongOpenChange?.(Boolean(selectedSong));
+    return () => onSongOpenChange?.(false);
+  }, [selectedSong, onSongOpenChange]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSubmit) {
       return;
     }
+    platform.hapticTap();
     inputRef.current?.blur();
     submitSearch();
   };
@@ -167,6 +196,8 @@ export function OnlineSearchPanel({
         isSaved={Boolean(savedMatch)}
         isSaving={isSaving}
         saveError={saveError}
+        isStageMode={isStageMode}
+        onToggleStageMode={onToggleStageMode}
         onSave={() => {
           void handleSave();
         }}
@@ -189,10 +220,7 @@ export function OnlineSearchPanel({
 
   return (
     <section className="flex w-full flex-col">
-      <div
-        className="sticky top-0 z-20 border-b border-neutral-800/80 bg-neutral-950/95 px-4 pb-3 backdrop-blur-md"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
-      >
+      <div className="sticky top-0 z-20 border-b border-outline-variant chrome-bar pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3 pl-[calc(env(safe-area-inset-left)+1rem)] pr-[calc(env(safe-area-inset-right)+1rem)]">
         <form
           onSubmit={handleSubmit}
           className="mx-auto flex w-full max-w-2xl items-stretch gap-2"
@@ -205,7 +233,7 @@ export function OnlineSearchPanel({
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="pointer-events-none absolute left-3.5 h-4 w-4 text-neutral-500"
+              className="pointer-events-none absolute left-4 h-4 w-4 text-on-surface-variant"
               aria-hidden="true"
             >
               <circle cx="11" cy="11" r="7" />
@@ -221,19 +249,20 @@ export function OnlineSearchPanel({
               placeholder={cs.search.placeholder}
               aria-label={cs.search.placeholder}
               autoComplete="off"
-              className={`w-full rounded-xl border border-neutral-700 bg-neutral-900 py-2.5 pl-10 text-base text-white placeholder-neutral-500 outline-none focus:border-amber-500 ${
-                query.length > 0 ? 'pr-10' : 'pr-4'
+              className={`min-h-12 w-full rounded-full border border-outline-variant bg-surface-container py-2.5 pl-11 text-base text-on-surface placeholder-on-surface-variant outline-none transition-colors focus:border-primary ${
+                query.length > 0 ? 'pr-12' : 'pr-4'
               }`}
             />
             {query.length > 0 ? (
               <button
                 type="button"
                 onClick={() => {
+                  platform.hapticTap();
                   clearSearch();
                   inputRef.current?.focus();
                 }}
                 aria-label={cs.search.clear}
-                className="absolute right-2 rounded-lg px-2 py-1 text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+                className="absolute right-0 inline-flex h-12 w-12 items-center justify-center rounded-full text-lg font-medium text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface"
               >
                 ×
               </button>
@@ -243,14 +272,14 @@ export function OnlineSearchPanel({
           <button
             type="submit"
             disabled={!canSubmit}
-            className="shrink-0 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+            className="min-h-12 shrink-0 rounded-full bg-primary px-5 text-sm font-semibold text-on-primary transition-transform duration-150 hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-surface-container-highest disabled:text-on-surface-variant"
           >
             {cs.search.submit}
           </button>
         </form>
       </div>
 
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pt-4">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 pt-4 pl-[calc(env(safe-area-inset-left)+1rem)] pr-[calc(env(safe-area-inset-right)+1rem)]">
         {providerStatuses.length > 0 ? (
           <div className="flex flex-wrap items-center gap-2">
             {providerStatuses.map((status) => (
@@ -259,8 +288,11 @@ export function OnlineSearchPanel({
             {hasAnyError && !isSearching ? (
               <button
                 type="button"
-                onClick={retrySearch}
-                className="rounded-full border border-neutral-700 px-2.5 py-1 text-xs text-neutral-300 hover:bg-neutral-800"
+                onClick={() => {
+                  platform.hapticTap();
+                  retrySearch();
+                }}
+                className="inline-flex min-h-12 items-center rounded-full border border-outline-variant bg-surface-container px-4 text-xs font-medium text-on-surface hover:bg-surface-container-high"
               >
                 {cs.search.retry}
               </button>
@@ -269,19 +301,28 @@ export function OnlineSearchPanel({
         ) : null}
 
         {isLoadingSong ? (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          <div
+            role="status"
+            className="rounded-2xl border border-primary/35 bg-primary-container px-4 py-3 text-sm font-medium text-on-primary-container"
+          >
             {cs.search.loadingSong}
           </div>
         ) : null}
 
         {songError ? (
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <div
+            role="alert"
+            className="flex items-center justify-between gap-3 rounded-2xl border border-error/40 bg-error-container px-4 py-3 text-sm text-on-error-container"
+          >
             <span>{getErrorMessage(songError.code)}</span>
             {songError.retryable ? (
               <button
                 type="button"
-                onClick={retrySelectedResult}
-                className="shrink-0 rounded-lg border border-red-400/40 px-3 py-1 text-xs font-medium text-red-100 hover:bg-red-500/20"
+                onClick={() => {
+                  platform.hapticTap();
+                  retrySelectedResult();
+                }}
+                className="inline-flex min-h-12 shrink-0 items-center rounded-xl border border-error/40 bg-surface-container-low px-4 text-xs font-semibold text-on-surface hover:bg-surface-container"
               >
                 {cs.search.retry}
               </button>
@@ -290,7 +331,9 @@ export function OnlineSearchPanel({
         ) : null}
 
         {!hasSearched ? (
-          <p className="py-10 text-center text-sm text-neutral-500">{cs.search.submitHint}</p>
+          <p className="py-10 text-center text-sm text-on-surface-variant">
+            {cs.search.submitHint}
+          </p>
         ) : results.length > 0 ? (
           <div className="flex flex-col gap-2">
             {results.map((item) => (
@@ -306,9 +349,11 @@ export function OnlineSearchPanel({
             ))}
           </div>
         ) : isSearching ? (
-          <p className="py-10 text-center text-sm text-neutral-400">{cs.search.searching}</p>
+          <SearchResultsSkeleton />
         ) : (
-          <p className="py-10 text-center text-sm text-neutral-500">{cs.search.noResults}</p>
+          <p className="py-10 text-center text-sm text-on-surface-variant">
+            {cs.search.noResults}
+          </p>
         )}
       </div>
     </section>

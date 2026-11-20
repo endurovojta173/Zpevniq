@@ -1,15 +1,19 @@
 import { SearchOrchestrator } from './orchestrator';
 import type { SongProvider } from './provider.interface';
 import { akordyKytaryProvider } from './providers/akordykytary/provider';
+import { brnkniProvider } from './providers/brnkni/provider';
 import { chordieProvider } from './providers/chordie/provider';
 import { guitareTabProvider } from './providers/guitaretab/provider';
 import { velkyZpevnikProvider } from './providers/velkyzpevnik/provider';
+import { zpevnikWzProvider } from './providers/zpevnikwz/provider';
 
 const DISABLED_PROVIDERS_STORAGE_KEY = 'zpevniq.disabledProviders';
 
 const registeredProviders: SongProvider[] = [
   velkyZpevnikProvider,
   akordyKytaryProvider,
+  brnkniProvider,
+  zpevnikWzProvider,
   chordieProvider,
   guitareTabProvider,
 ];

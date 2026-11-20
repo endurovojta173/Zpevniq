@@ -3,6 +3,11 @@ export interface ChordProSegment {
   readonly lyric: string;
 }
 
+export interface ChordProWordCluster {
+  readonly parts: readonly ChordProSegment[];
+  readonly trailingSpace: boolean;
+}
+
 export type ChordProPreviewLine =
   | { readonly kind: 'empty' }
   | { readonly kind: 'comment'; readonly text: string }
@@ -112,4 +117,56 @@ export function parseChordProPreview(chordpro: string): ChordProPreview {
     ...(capo !== undefined ? { capo } : {}),
     lines,
   };
+}
+
+/**
+ * Groups parsed inline chord/lyric segments of a single line into unbroken word clusters
+ * split at whitespace boundaries. Keeps mid-word chords attached inside one cluster so
+ * wrapped mobile lines break cleanly between words without splitting words in half.
+ */
+export function groupLineIntoWordClusters(
+  segments: readonly ChordProSegment[],
+): ChordProWordCluster[] {
+  const clusters: ChordProWordCluster[] = [];
+  let currentParts: ChordProSegment[] = [];
+
+  const flush = (trailingSpace: boolean) => {
+    if (currentParts.length === 0) {
+      return;
+    }
+    clusters.push({ parts: currentParts, trailingSpace });
+    currentParts = [];
+  };
+
+  for (const segment of segments) {
+    let pendingChord = segment.chord;
+    const tokens = segment.lyric.match(/\s+|\S+/g);
+
+    if (!tokens || tokens.length === 0) {
+      if (pendingChord !== undefined) {
+        currentParts.push({ chord: pendingChord, lyric: '' });
+      }
+      continue;
+    }
+
+    for (const token of tokens) {
+      if (/^\s+$/.test(token)) {
+        if (pendingChord !== undefined) {
+          currentParts.push({ chord: pendingChord, lyric: '' });
+          pendingChord = undefined;
+        }
+        flush(true);
+      } else {
+        currentParts.push(
+          pendingChord !== undefined
+            ? { chord: pendingChord, lyric: token }
+            : { lyric: token },
+        );
+        pendingChord = undefined;
+      }
+    }
+  }
+
+  flush(false);
+  return clusters;
 }

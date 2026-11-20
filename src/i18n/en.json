@@ -11,12 +11,22 @@
     "fileImport": "Import File"
   },
   "nav": {
+    "ariaLabel": "Main navigation",
     "songbook": "Songbook",
     "search": "Search",
     "settings": "Settings"
   },
   "settings": {
     "title": "Settings",
+    "appearanceTitle": "Appearance & Theme",
+    "themeLabel": "Color theme",
+    "themes": {
+      "system": "System",
+      "dark": "Dark",
+      "light": "Light",
+      "stage": "Stage"
+    },
+    "stageHint": "Stage mode uses a pure-black OLED canvas for dark venues.",
     "aboutTitle": "About",
     "versionLabel": "Version",
     "versionValue": "0.1.0",
@@ -81,18 +91,35 @@
     }
   },
   "preview": {
+    "untitled": "Untitled",
     "back": "Back",
     "formattedView": "Preview",
     "rawChordPro": "ChordPro",
+    "displayTools": "Display",
+    "sheetTitle": "Display settings",
+    "close": "Close",
+    "fontSizeLabel": "Song font size",
+    "fontDecrease": "Decrease font size",
+    "fontIncrease": "Increase font size",
+    "fontReset": "Reset",
+    "stageModeLabel": "Stage mode (OLED)",
+    "stageModeDescription": "True-black background and maximum chord contrast",
+    "viewModeLabel": "View mode",
     "keyLabel": "Key",
     "capoLabel": "Capo",
     "sourceLabel": "Source",
     "localFileSource": "Local file",
-    "saveToSongbook": "＋ Save to Songbook",
+    "saveToSongbook": "Save",
     "saving": "Saving…",
-    "savedBadge": "✓ Saved to Songbook",
-    "removeFromSongbook": "Remove",
+    "savedBadge": "Saved",
+    "removeFromSongbook": "Remove from songbook",
+    "confirmRemove": "Confirm remove?",
+    "cancel": "Cancel",
     "saveError": "Failed to update local database."
+  },
+  "toast": {
+    "saved": "Saved to songbook",
+    "removed": "Removed from songbook"
   },
   "webFallback": {
     "title": "Online search is available on mobile only",

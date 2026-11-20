@@ -11,12 +11,22 @@
     "fileImport": "Import souboru"
   },
   "nav": {
+    "ariaLabel": "Hlavní navigace",
     "songbook": "Zpěvník",
     "search": "Hledat",
     "settings": "Nastavení"
   },
   "settings": {
     "title": "Nastavení",
+    "appearanceTitle": "Vzhled a motiv",
+    "themeLabel": "Barevný režim",
+    "themes": {
+      "system": "Systém",
+      "dark": "Tmavý",
+      "light": "Světlý",
+      "stage": "Pódium"
+    },
+    "stageHint": "Režim Pódium používá čistě černé OLED pozadí pro hraní ve tmě.",
     "aboutTitle": "O aplikaci",
     "versionLabel": "Verze",
     "versionValue": "0.1.0",
@@ -81,18 +91,35 @@
     }
   },
   "preview": {
+    "untitled": "Bez názvu",
     "back": "Zpět",
     "formattedView": "Náhled",
     "rawChordPro": "ChordPro",
+    "displayTools": "Zobrazení",
+    "sheetTitle": "Nastavení zobrazení",
+    "close": "Zavřít",
+    "fontSizeLabel": "Velikost písma písně",
+    "fontDecrease": "Zmenšit písmo",
+    "fontIncrease": "Zvětšit písmo",
+    "fontReset": "Výchozí",
+    "stageModeLabel": "Režim Pódium (OLED)",
+    "stageModeDescription": "Čistě černé pozadí a maximální kontrast akordů",
+    "viewModeLabel": "Formát zobrazení",
     "keyLabel": "Tónina",
     "capoLabel": "Kapo",
     "sourceLabel": "Zdroj",
     "localFileSource": "Lokální soubor",
-    "saveToSongbook": "＋ Uložit do zpěvníku",
+    "saveToSongbook": "Uložit",
     "saving": "Ukládám…",
-    "savedBadge": "✓ Uloženo ve zpěvníku",
-    "removeFromSongbook": "Odebrat",
+    "savedBadge": "Uloženo",
+    "removeFromSongbook": "Odebrat ze zpěvníku",
+    "confirmRemove": "Opravdu odebrat?",
+    "cancel": "Zrušit",
     "saveError": "Nepodařilo se uložit změnu do lokální databáze."
+  },
+  "toast": {
+    "saved": "Uloženo do zpěvníku",
+    "removed": "Odebráno ze zpěvníku"
   },
   "webFallback": {
     "title": "Online vyhledávání běží pouze na mobilu",
