@@ -2,7 +2,53 @@
   "app": {
     "name": "Zpevniq",
     "subtitle": "Offline-first ChordPro songbook",
-    "platformMobile": "Native mobile mode (client-side search enabled)",
-    "platformWeb": "Web mode (file import and cloud sync)"
+    "platformMobile": "Native mobile mode",
+    "platformWeb": "Web mode"
+  },
+  "search": {
+    "placeholder": "Search song or artist (min. 2 characters)…",
+    "clear": "Clear",
+    "minCharsHint": "Enter at least 2 characters to search across enabled sources.",
+    "searching": "Searching…",
+    "noResults": "No songs found for this query.",
+    "resultsCount": "results",
+    "loadingSong": "Loading song and converting to ChordPro…",
+    "retry": "Retry",
+    "matchType": {
+      "title": "Title",
+      "artist": "Artist",
+      "lyrics": "Lyrics"
+    },
+    "providerStatus": {
+      "loading": "searching…",
+      "resultsSuffix": "songs"
+    },
+    "errors": {
+      "PLATFORM_UNSUPPORTED": "Online search is only available in the native mobile app.",
+      "OFFLINE": "Device is offline. Reconnect or browse saved songs.",
+      "TIMEOUT": "Source did not respond in time. Please try again.",
+      "NETWORK_ERROR": "Could not reach the source.",
+      "RATE_LIMITED": "Source temporarily rate-limited requests. Try again shortly.",
+      "BLOCKED": "Source requires browser verification and blocks automated access.",
+      "NOT_FOUND": "Requested song was not found on the source.",
+      "UPSTREAM_ERROR": "Source is currently experiencing an outage.",
+      "PARSE_ERROR": "Could not parse the page (source markup changed).",
+      "ABORTED": "Request was cancelled."
+    }
+  },
+  "preview": {
+    "back": "Back",
+    "formattedView": "Preview",
+    "rawChordPro": "ChordPro",
+    "keyLabel": "Key",
+    "capoLabel": "Capo",
+    "sourceLabel": "Source",
+    "localFileSource": "Local file"
+  },
+  "webFallback": {
+    "title": "Online search is available on mobile only",
+    "description": "Web browsers block direct cross-origin requests due to CORS. On PC you can import local .cho or .txt chords-over-lyrics files and verify ChordPro conversion right away.",
+    "importButton": "Import .cho / .txt file",
+    "importError": "Failed to read file or file is empty."
   }
 }

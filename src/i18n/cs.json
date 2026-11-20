@@ -2,7 +2,53 @@
   "app": {
     "name": "Zpevniq",
     "subtitle": "Offline-first zpěvník ve formátu ChordPro",
-    "platformMobile": "Nativní mobilní režim (klientské vyhledávání povoleno)",
-    "platformWeb": "Webový režim (import souborů a synchronizace)"
+    "platformMobile": "Nativní mobilní režim",
+    "platformWeb": "Webový režim"
+  },
+  "search": {
+    "placeholder": "Hledat píseň nebo interpreta (min. 2 znaky)…",
+    "clear": "Vymazat",
+    "minCharsHint": "Zadej alespoň 2 znaky pro vyhledávání napříč zdroji.",
+    "searching": "Vyhledávám…",
+    "noResults": "Pro zadaný dotaz nebyly nalezeny žádné písně.",
+    "resultsCount": "výsledků",
+    "loadingSong": "Načítám píseň a převádím do ChordPro…",
+    "retry": "Zkusit znovu",
+    "matchType": {
+      "title": "Název",
+      "artist": "Interpret",
+      "lyrics": "Text"
+    },
+    "providerStatus": {
+      "loading": "hledá…",
+      "resultsSuffix": "písní"
+    },
+    "errors": {
+      "PLATFORM_UNSUPPORTED": "Online vyhledávání je dostupné pouze v mobilní aplikaci.",
+      "OFFLINE": "Zařízení je offline. Připoj se k internetu nebo otevři uložené písně.",
+      "TIMEOUT": "Zdroj neodpověděl včas. Zkus to prosím znovu.",
+      "NETWORK_ERROR": "Nepodařilo se spojit se zdrojem.",
+      "RATE_LIMITED": "Zdroj dočasně omezil požadavky. Zkus to za chvíli.",
+      "BLOCKED": "Zdroj vyžaduje ověření prohlížeče a blokuje automatický přístup.",
+      "NOT_FOUND": "Požadovaná píseň nebyla na zdroji nalezena.",
+      "UPSTREAM_ERROR": "Zdroj má momentálně technický výpadek.",
+      "PARSE_ERROR": "Stránku se nepodařilo rozpoznat (změna formátu zdroje).",
+      "ABORTED": "Požadavek byl zrušen."
+    }
+  },
+  "preview": {
+    "back": "Zpět",
+    "formattedView": "Náhled",
+    "rawChordPro": "ChordPro",
+    "keyLabel": "Tónina",
+    "capoLabel": "Kapo",
+    "sourceLabel": "Zdroj",
+    "localFileSource": "Lokální soubor"
+  },
+  "webFallback": {
+    "title": "Online vyhledávání běží pouze na mobilu",
+    "description": "Webové prohlížeče blokují přímé stahování cizích stránek kvůli CORS. Na PC můžeš importovat vlastní soubory .cho nebo .txt s akordy nad textem a rovnou si ověřit převod do ChordPro.",
+    "importButton": "Importovat .cho / .txt soubor",
+    "importError": "Soubor se nepodařilo načíst nebo je prázdný."
   }
 }
