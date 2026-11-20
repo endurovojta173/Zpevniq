@@ -6,9 +6,10 @@
     "platformWeb": "Web mode"
   },
   "search": {
-    "placeholder": "Search song or artist (min. 2 characters)…",
+    "placeholder": "Song title or artist…",
+    "submit": "Search",
     "clear": "Clear",
-    "minCharsHint": "Enter at least 2 characters to search across enabled sources.",
+    "submitHint": "Enter a song title or artist and press Search.",
     "searching": "Searching…",
     "noResults": "No songs found for this query.",
     "resultsCount": "results",

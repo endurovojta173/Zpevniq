@@ -9,11 +9,13 @@ import {
 import { platform } from '../services/platform';
 import { searchOrchestrator } from '../services/scrapers/registry';
 
-const SEARCH_DEBOUNCE_MS = 350;
+const MIN_QUERY_LENGTH = 2;
 
 export interface UseSongSearchState {
   readonly query: string;
   readonly setQuery: (value: string) => void;
+  readonly submittedQuery: string;
+  readonly canSubmit: boolean;
   readonly results: readonly SongSearchResult[];
   readonly providerStatuses: readonly ProviderSearchStatus[];
   readonly isSearching: boolean;
@@ -21,6 +23,8 @@ export interface UseSongSearchState {
   readonly selectedSong: ScrapedSong | null;
   readonly isLoadingSong: boolean;
   readonly songError: ScraperError | null;
+  readonly submitSearch: (overrideQuery?: string) => void;
+  readonly clearSearch: () => void;
   readonly openResult: (result: SongSearchResult) => void;
   readonly clearSelectedSong: () => void;
   readonly retrySearch: () => void;
@@ -29,7 +33,7 @@ export interface UseSongSearchState {
 
 export function useSongSearch(): UseSongSearchState {
   const [query, setQuery] = useState('');
-  const [searchNonce, setSearchNonce] = useState(0);
+  const [submittedQuery, setSubmittedQuery] = useState('');
   const [results, setResults] = useState<readonly SongSearchResult[]>([]);
   const [providerStatuses, setProviderStatuses] = useState<readonly ProviderSearchStatus[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -40,56 +44,72 @@ export function useSongSearch(): UseSongSearchState {
   const [songError, setSongError] = useState<ScraperError | null>(null);
 
   const lastOpenedResultRef = useRef<SongSearchResult | null>(null);
+  const searchAbortRef = useRef<AbortController | null>(null);
   const songAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    return () => {
+      searchAbortRef.current?.abort();
+      songAbortRef.current?.abort();
+    };
+  }, []);
+
+  const executeSearch = useCallback((rawQuery: string) => {
     if (!platform.canScrape) {
       return;
     }
 
-    const trimmed = query.trim();
-    if (trimmed.length < 2) {
-      setResults([]);
-      setProviderStatuses([]);
-      setIsSearching(false);
-      setHasSearched(false);
+    const trimmed = rawQuery.trim();
+    if (trimmed.length < MIN_QUERY_LENGTH) {
       return;
     }
 
+    searchAbortRef.current?.abort();
     const controller = new AbortController();
-    const timer = window.setTimeout(() => {
-      setIsSearching(true);
-      setHasSearched(true);
+    searchAbortRef.current = controller;
 
-      void searchOrchestrator
-        .searchAllProviders(trimmed, {
-          signal: controller.signal,
-          onUpdate: (snapshot) => {
-            if (controller.signal.aborted) {
-              return;
-            }
-            setResults(snapshot.results);
-            setProviderStatuses(snapshot.providerStatuses);
-            setIsSearching(!snapshot.isComplete);
-          },
-        })
-        .catch(() => {
-          if (!controller.signal.aborted) {
-            setIsSearching(false);
+    setSubmittedQuery(trimmed);
+    setResults([]);
+    setProviderStatuses([]);
+    setSongError(null);
+    setIsSearching(true);
+    setHasSearched(true);
+
+    void searchOrchestrator
+      .searchAllProviders(trimmed, {
+        signal: controller.signal,
+        onUpdate: (snapshot) => {
+          if (controller.signal.aborted) {
+            return;
           }
-        });
-    }, SEARCH_DEBOUNCE_MS);
+          setResults(snapshot.results);
+          setProviderStatuses(snapshot.providerStatuses);
+          setIsSearching(!snapshot.isComplete);
+        },
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setIsSearching(false);
+        }
+      });
+  }, []);
 
-    return () => {
-      window.clearTimeout(timer);
-      controller.abort();
-    };
-  }, [query, searchNonce]);
+  const submitSearch = useCallback(
+    (overrideQuery?: string) => {
+      executeSearch(overrideQuery ?? query);
+    },
+    [executeSearch, query],
+  );
 
-  useEffect(() => {
-    return () => {
-      songAbortRef.current?.abort();
-    };
+  const clearSearch = useCallback(() => {
+    searchAbortRef.current?.abort();
+    setQuery('');
+    setSubmittedQuery('');
+    setResults([]);
+    setProviderStatuses([]);
+    setIsSearching(false);
+    setHasSearched(false);
+    setSongError(null);
   }, []);
 
   const openResult = useCallback((result: SongSearchResult) => {
@@ -142,8 +162,11 @@ export function useSongSearch(): UseSongSearchState {
 
   const retrySearch = useCallback(() => {
     searchOrchestrator.clearCache();
-    setSearchNonce((prev) => prev + 1);
-  }, []);
+    const target = query.trim().length >= MIN_QUERY_LENGTH ? query : submittedQuery;
+    if (target.trim().length >= MIN_QUERY_LENGTH) {
+      executeSearch(target);
+    }
+  }, [executeSearch, query, submittedQuery]);
 
   const retrySelectedResult = useCallback(() => {
     if (lastOpenedResultRef.current) {
@@ -154,6 +177,8 @@ export function useSongSearch(): UseSongSearchState {
   return {
     query,
     setQuery,
+    submittedQuery,
+    canSubmit: query.trim().length >= MIN_QUERY_LENGTH,
     results,
     providerStatuses,
     isSearching,
@@ -161,6 +186,8 @@ export function useSongSearch(): UseSongSearchState {
     selectedSong,
     isLoadingSong,
     songError,
+    submitSearch,
+    clearSearch,
     openResult,
     clearSelectedSong,
     retrySearch,

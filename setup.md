@@ -205,21 +205,47 @@ adb wait-for-device && \
 > **First Gradle build note:** The very first `npx cap run android` downloads Gradle, Android build tools, and dependencies (~5–6 minutes). Subsequent builds use the Gradle cache and finish in ~5–15 seconds.
 
 #### Run on a Physical Android Phone (USB)
-1. On your phone: **Settings → About phone** → tap **Build number** 7 times to unlock Developer Options.
-2. Go to **Settings → System → Developer options** → enable **USB debugging**.
-3. Connect via USB, accept the RSA fingerprint prompt on the phone, and verify:
+1. Ensure `JAVA_HOME` and `ANDROID_HOME` are exported in your shell (Step 2.3)—`npx cap run android` (`native-run`) requires `ANDROID_HOME` in the environment, not just `android/local.properties`.
+2. On your phone: **Settings → About phone** → tap **Build number** 7 times to unlock Developer Options.
+3. Go to **Settings → System → Developer options** → enable **USB debugging**.
+   - *Xiaomi / MIUI / HyperOS:* also enable **Install via USB** in Developer Options.
+4. Connect with a data-capable USB cable, switch USB mode to **File Transfer (MTP)**, and accept the *"Allow USB debugging?"* prompt on the phone (*Always allow from this computer*).
+5. Verify the phone is listed as `device` (not `unauthorized`):
    ```bash
    adb devices
    ```
-4. Build and run:
+6. Build, install, and launch:
    ```bash
    npm run cap:sync && npx cap run android
    ```
+   If an emulator is running at the same time, target the physical phone explicitly:
+   ```bash
+   npx cap run android --list
+   npx cap run android --target <DEVICE_ID>
+   ```
 
-#### Selecting a Specific Device / Emulator
+#### Run on a Physical Android Phone over Wi-Fi (Android 11+ Wireless Debugging)
+No USB cable needed once paired on the same Wi-Fi network:
+1. On your phone: **Settings → System → Developer options** → enable **Wireless debugging**, then tap it to open details.
+2. Tap **Pair device with pairing code** and note the `<IP>:<PAIR_PORT>` and 6-digit code.
+3. Pair and connect from your terminal:
+   ```bash
+   adb pair <IP>:<PAIR_PORT>          # enter the 6-digit code when prompted
+   adb connect <IP>:<DEBUG_PORT>      # use the IP:port shown on the main Wireless debugging screen
+   adb devices                        # verify <IP>:<DEBUG_PORT> appears as "device"
+   ```
+4. Build, install, and launch on the wireless target:
+   ```bash
+   npm run cap:sync && npx cap run android --target <IP>:<DEBUG_PORT>
+   ```
+
+#### Direct Gradle Build & Manual ADB Install (Alternative to `npx cap run`)
+If you prefer building the debug APK directly with Gradle and deploying via `adb`:
 ```bash
-npx cap run android --list
-npx cap run android --target <DEVICE_ID>
+npm run cap:sync
+(cd android && ./gradlew assembleDebug)
+adb -s <DEVICE_ID> install -r android/app/build/outputs/apk/debug/app-debug.apk
+adb -s <DEVICE_ID> shell am start -n com.zpevniq.app/.MainActivity
 ```
 
 #### Fast Live-Reload Development (Phone or Emulator on Same Wi-Fi)
@@ -306,6 +332,7 @@ npm run cap:sync
 | Issue | Fix |
 | :--- | :--- |
 | `java: command not found` or `Unsupported class file major version` | Install **JDK 21 LTS** (Step 2.1) and verify `java -version` prints `21.x`. Gradle 8.14 does **not** support JDK 25, and Capacitor 8 requires at least JDK 21. |
+| `ERR_SDK_NOT_FOUND: No valid Android SDK root found` | Export `ANDROID_HOME` in your shell (`export ANDROID_HOME="$HOME/Android/Sdk"` on Ubuntu, or `~/Library/Android/sdk` on macOS) and persist it in `~/.bashrc` / `~/.zshrc` (Step 2.3). `android/local.properties` alone is read by Gradle, not by Capacitor's `native-run`. |
 | `SDK location not found` during Gradle build | Ensure `ANDROID_HOME` is exported in your shell, or create `android/local.properties` with `sdk.dir=/absolute/path/to/Android/Sdk` (this file is gitignored). |
 | `npx cap run android` hangs indefinitely on `Deploying app-debug.apk` | Press `Ctrl+C` and start the emulator manually via `emulator -avd <AVD_NAME>` to see why it failed to boot (on Ubuntu + Wayland, try `QT_QPA_PLATFORM=xcb emulator -avd <AVD_NAME>`). |
 | Emulator exits with `Not enough space to create userdata partition` | Free at least **8–10 GB** of disk space on the partition hosting `~/.android/avd` (Android 36 AVDs require ~7.4 GB for the userdata partition). |

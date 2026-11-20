@@ -1,3 +1,4 @@
+import { type FormEvent, useRef } from 'react';
 import type {
   ProviderSearchStatus,
   ScraperErrorCode,
@@ -71,9 +72,11 @@ function SearchResultRow({
 }
 
 export function OnlineSearchPanel() {
+  const inputRef = useRef<HTMLInputElement>(null);
   const {
     query,
     setQuery,
+    canSubmit,
     results,
     providerStatuses,
     isSearching,
@@ -81,11 +84,22 @@ export function OnlineSearchPanel() {
     selectedSong,
     isLoadingSong,
     songError,
+    submitSearch,
+    clearSearch,
     openResult,
     clearSelectedSong,
     retrySearch,
     retrySelectedResult,
   } = useSongSearch();
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canSubmit) {
+      return;
+    }
+    inputRef.current?.blur();
+    submitSearch();
+  };
 
   if (selectedSong) {
     return (
@@ -103,26 +117,45 @@ export function OnlineSearchPanel() {
 
   return (
     <section className="flex w-full max-w-2xl flex-col gap-4">
-      <div className="relative flex items-center">
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder={cs.search.placeholder}
-          aria-label={cs.search.placeholder}
-          autoComplete="off"
-          className="w-full rounded-xl border border-neutral-700 bg-neutral-900 px-4 py-3 pr-20 text-base text-white placeholder-neutral-500 outline-none focus:border-amber-500"
-        />
-        {query.length > 0 ? (
-          <button
-            type="button"
-            onClick={() => setQuery('')}
-            className="absolute right-2.5 rounded-lg px-2.5 py-1 text-xs font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
-          >
-            {cs.search.clear}
-          </button>
-        ) : null}
-      </div>
+      <form onSubmit={handleSubmit} className="flex items-stretch gap-2">
+        <div className="relative flex flex-1 items-center">
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="search"
+            enterKeyHint="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={cs.search.placeholder}
+            aria-label={cs.search.placeholder}
+            autoComplete="off"
+            className={`w-full rounded-xl border border-neutral-700 bg-neutral-900 py-3 pl-4 text-base text-white placeholder-neutral-500 outline-none focus:border-amber-500 ${
+              query.length > 0 ? 'pr-10' : 'pr-4'
+            }`}
+          />
+          {query.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => {
+                clearSearch();
+                inputRef.current?.focus();
+              }}
+              aria-label={cs.search.clear}
+              className="absolute right-2 rounded-lg px-2 py-1 text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+            >
+              ×
+            </button>
+          ) : null}
+        </div>
+
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className="shrink-0 rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+        >
+          {cs.search.submit}
+        </button>
+      </form>
 
       {providerStatuses.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
@@ -163,7 +196,7 @@ export function OnlineSearchPanel() {
       ) : null}
 
       {!hasSearched ? (
-        <p className="py-6 text-center text-sm text-neutral-500">{cs.search.minCharsHint}</p>
+        <p className="py-6 text-center text-sm text-neutral-500">{cs.search.submitHint}</p>
       ) : results.length > 0 ? (
         <div className="flex flex-col gap-2">
           {results.map((item) => (

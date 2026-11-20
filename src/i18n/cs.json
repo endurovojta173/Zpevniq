@@ -6,9 +6,10 @@
     "platformWeb": "Webový režim"
   },
   "search": {
-    "placeholder": "Hledat píseň nebo interpreta (min. 2 znaky)…",
+    "placeholder": "Název písně nebo interpreta…",
+    "submit": "Hledat",
     "clear": "Vymazat",
-    "minCharsHint": "Zadej alespoň 2 znaky pro vyhledávání napříč zdroji.",
+    "submitHint": "Zadej název písně nebo interpreta a potvrď tlačítkem Hledat.",
     "searching": "Vyhledávám…",
     "noResults": "Pro zadaný dotaz nebyly nalezeny žádné písně.",
     "resultsCount": "výsledků",
