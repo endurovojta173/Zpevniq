@@ -10,6 +10,32 @@
     "onlineSearch": "Najít online",
     "fileImport": "Import souboru"
   },
+  "nav": {
+    "songbook": "Zpěvník",
+    "search": "Hledat",
+    "settings": "Nastavení"
+  },
+  "settings": {
+    "title": "Nastavení",
+    "aboutTitle": "O aplikaci",
+    "versionLabel": "Verze",
+    "versionValue": "0.1.0",
+    "formatLabel": "Formát písní",
+    "formatValue": "ChordPro (.cho)",
+    "environmentTitle": "Prostředí a úložiště",
+    "platformLabel": "Režim běhu",
+    "osLabel": "Platforma",
+    "storageLabel": "Lokální databáze",
+    "storageNative": "SQLite + FTS5",
+    "storageWeb": "IndexedDB (Dexie)",
+    "savedSongsLabel": "Uložené písně",
+    "sourcesTitle": "Online zdroje akordů",
+    "sourcesStatusLabel": "Klientské vyhledávání",
+    "sourcesEnabled": "Aktivní (CapacitorHttp)",
+    "sourcesDisabledWeb": "Vypnuto v prohlížeči (CORS)",
+    "activeSourcesLabel": "Registrované zdroje",
+    "offlineNotice": "Všechny uložené písně jsou uloženy lokálně přímo v zařízení a fungují 100% offline."
+  },
   "library": {
     "searchPlaceholder": "Hledat v mém zpěvníku…",
     "loading": "Načítám uložené písně…",

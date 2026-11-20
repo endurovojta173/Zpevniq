@@ -10,6 +10,32 @@
     "onlineSearch": "Find Online",
     "fileImport": "Import File"
   },
+  "nav": {
+    "songbook": "Songbook",
+    "search": "Search",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "aboutTitle": "About",
+    "versionLabel": "Version",
+    "versionValue": "0.1.0",
+    "formatLabel": "Song format",
+    "formatValue": "ChordPro (.cho)",
+    "environmentTitle": "Environment & Storage",
+    "platformLabel": "Runtime mode",
+    "osLabel": "Platform",
+    "storageLabel": "Local database",
+    "storageNative": "SQLite + FTS5",
+    "storageWeb": "IndexedDB (Dexie)",
+    "savedSongsLabel": "Saved songs",
+    "sourcesTitle": "Online Chord Sources",
+    "sourcesStatusLabel": "Client-side search",
+    "sourcesEnabled": "Enabled (CapacitorHttp)",
+    "sourcesDisabledWeb": "Disabled in browser (CORS)",
+    "activeSourcesLabel": "Registered sources",
+    "offlineNotice": "All saved songs are stored locally on your device and work 100% offline."
+  },
   "library": {
     "searchPlaceholder": "Search in my songbook…",
     "loading": "Loading saved songs…",

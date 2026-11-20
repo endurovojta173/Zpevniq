@@ -97,7 +97,13 @@ export function WebImportFallback({
           try {
             await onDeleteSong(savedMatch.id);
             setImportedSong((prev) =>
-              prev ? { title: prev.title, sourceName: prev.sourceName, chordproContent: prev.chordproContent } : null,
+              prev
+                ? {
+                    title: prev.title,
+                    sourceName: prev.sourceName,
+                    chordproContent: prev.chordproContent,
+                  }
+                : null,
             );
           } catch (err) {
             setSaveError(err instanceof Error ? err.message : cs.preview.saveError);
@@ -134,23 +140,39 @@ export function WebImportFallback({
   }
 
   return (
-    <section className="flex w-full max-w-xl flex-col items-center gap-4 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-center">
-      <h2 className="text-lg font-semibold text-white">{cs.webFallback.title}</h2>
-      <p className="text-sm leading-relaxed text-neutral-400">{cs.webFallback.description}</p>
+    <section className="flex w-full flex-col">
+      <div
+        className="sticky top-0 z-20 border-b border-neutral-800/80 bg-neutral-950/95 px-4 pb-3 backdrop-blur-md"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
+      >
+        <div className="mx-auto flex w-full max-w-2xl items-center justify-between">
+          <h1 className="text-lg font-bold tracking-tight text-white">{cs.tabs.fileImport}</h1>
+          <span className="rounded-full border border-neutral-800 bg-neutral-900 px-2.5 py-0.5 text-xs text-neutral-400">
+            {cs.app.platformWeb}
+          </span>
+        </div>
+      </div>
 
-      <label className="mt-2 inline-flex cursor-pointer items-center justify-center rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-amber-400">
-        {cs.webFallback.importButton}
-        <input
-          type="file"
-          accept=".cho,.chordpro,.chopro,.pro,.txt,text/plain"
-          onChange={handleFileChange}
-          className="sr-only"
-        />
-      </label>
+      <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 px-4 pt-6">
+        <div className="flex w-full flex-col items-center gap-4 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-center">
+          <h2 className="text-lg font-semibold text-white">{cs.webFallback.title}</h2>
+          <p className="text-sm leading-relaxed text-neutral-400">
+            {cs.webFallback.description}
+          </p>
 
-      {errorMessage ? (
-        <p className="text-sm text-red-400">{errorMessage}</p>
-      ) : null}
+          <label className="mt-2 inline-flex cursor-pointer items-center justify-center rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-amber-400">
+            {cs.webFallback.importButton}
+            <input
+              type="file"
+              accept=".cho,.chordpro,.chopro,.pro,.txt,text/plain"
+              onChange={handleFileChange}
+              className="sr-only"
+            />
+          </label>
+
+          {errorMessage ? <p className="text-sm text-red-400">{errorMessage}</p> : null}
+        </div>
+      </div>
     </section>
   );
 }
