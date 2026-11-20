@@ -17,6 +17,9 @@ export interface SavedSongsPanelProps {
 
 const PROVIDER_DISPLAY_NAMES: Readonly<Record<string, string>> = {
   velkyzpevnik: 'Velký zpěvník',
+  akordykytary: 'Akordy Kytary.cz',
+  chordie: 'Chordie',
+  guitaretab: 'GuitareTab',
   'local-file': cs.library.localSource,
 };
 
@@ -68,6 +71,7 @@ export function SavedSongsPanel({
       <SongPreview
         chordproContent={selectedSong.chordproContent}
         sourceName={formatSourceLabel(selectedSong.sourceProvider)}
+        sourceUrl={selectedSong.sourceUrl}
         fallbackTitle={selectedSong.title}
         fallbackArtist={selectedSong.artist || undefined}
         isSaved

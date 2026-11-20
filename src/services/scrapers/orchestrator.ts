@@ -26,6 +26,7 @@ export interface SearchOrchestratorConfig {
   readonly maxCacheEntries?: number;
   readonly minQueryLength?: number;
   readonly now?: () => number;
+  readonly isProviderEnabled?: (provider: SongProvider) => boolean;
 }
 
 interface CacheEntry<T> {
@@ -106,6 +107,7 @@ export class SearchOrchestrator {
   private readonly songCache: BoundedTtlCache<ScrapedSong>;
   private readonly minQueryLength: number;
   private readonly now: () => number;
+  private readonly isProviderEnabled: (provider: SongProvider) => boolean;
 
   constructor(
     getProviders: () => readonly SongProvider[],
@@ -114,6 +116,8 @@ export class SearchOrchestrator {
     this.getProviders = getProviders;
     this.now = config.now ?? (() => Date.now());
     this.minQueryLength = config.minQueryLength ?? DEFAULT_MIN_QUERY_LENGTH;
+    this.isProviderEnabled =
+      config.isProviderEnabled ?? ((provider) => provider.enabledByDefault);
     const ttlMs = config.cacheTtlMs ?? DEFAULT_CACHE_TTL_MS;
     const maxEntries = config.maxCacheEntries ?? DEFAULT_MAX_CACHE_ENTRIES;
     this.searchCache = new BoundedTtlCache(ttlMs, maxEntries, this.now);
@@ -123,7 +127,7 @@ export class SearchOrchestrator {
   private resolveTargetProviders(providerIds?: readonly string[]): readonly SongProvider[] {
     const all = this.getProviders();
     if (!providerIds || providerIds.length === 0) {
-      return all.filter((provider) => provider.enabledByDefault);
+      return all.filter((provider) => this.isProviderEnabled(provider));
     }
     const allowed = new Set(providerIds);
     return all.filter((provider) => allowed.has(provider.id));

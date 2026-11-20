@@ -5,6 +5,7 @@ import cs from '../i18n/cs.json';
 export interface SongPreviewProps {
   readonly chordproContent: string;
   readonly sourceName: string;
+  readonly sourceUrl?: string | null;
   readonly fallbackTitle?: string;
   readonly fallbackArtist?: string;
   readonly isSaved?: boolean;
@@ -18,6 +19,7 @@ export interface SongPreviewProps {
 export function SongPreview({
   chordproContent,
   sourceName,
+  sourceUrl = null,
   fallbackTitle,
   fallbackArtist,
   isSaved = false,
@@ -32,6 +34,8 @@ export function SongPreview({
   const parsed = useMemo(() => parseChordProPreview(chordproContent), [chordproContent]);
   const displayTitle = parsed.title ?? fallbackTitle ?? 'Bez názvu';
   const displayArtist = parsed.artist ?? fallbackArtist;
+  const safeSourceUrl =
+    sourceUrl && /^https?:\/\//i.test(sourceUrl) ? sourceUrl : null;
 
   return (
     <section className="flex w-full flex-col">
@@ -128,9 +132,23 @@ export function SongPreview({
                 {cs.preview.capoLabel}: {parsed.capo}
               </span>
             ) : null}
-            <span className="rounded-full border border-neutral-800 bg-neutral-900 px-2.5 py-0.5 text-neutral-400">
-              {cs.preview.sourceLabel}: {sourceName}
-            </span>
+            {safeSourceUrl ? (
+              <a
+                href={safeSourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 rounded-full border border-neutral-800 bg-neutral-900 px-2.5 py-0.5 text-neutral-300 underline decoration-neutral-600 underline-offset-2 transition hover:border-neutral-700 hover:text-white"
+              >
+                <span>
+                  {cs.preview.sourceLabel}: {sourceName}
+                </span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            ) : (
+              <span className="rounded-full border border-neutral-800 bg-neutral-900 px-2.5 py-0.5 text-neutral-400">
+                {cs.preview.sourceLabel}: {sourceName}
+              </span>
+            )}
           </div>
         </header>
 

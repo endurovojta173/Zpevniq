@@ -1,15 +1,19 @@
 import cs from '../i18n/cs.json';
 import { platform } from '../services/platform';
+import type { ProviderLanguage } from '../services/scrapers/provider.interface';
 
 export interface RegisteredSourceInfo {
   readonly id: string;
   readonly name: string;
   readonly baseUrl: string;
+  readonly language: ProviderLanguage;
+  readonly enabled: boolean;
 }
 
 export interface SettingsPanelProps {
   readonly totalSavedCount: number;
   readonly registeredSources: readonly RegisteredSourceInfo[];
+  readonly onToggleSource: (id: string, enabled: boolean) => void;
 }
 
 function InfoRow({
@@ -35,9 +39,20 @@ function InfoRow({
   );
 }
 
+function formatLanguageTag(language: ProviderLanguage): string {
+  if (language === 'cs') {
+    return 'CZ';
+  }
+  if (language === 'en') {
+    return 'EN';
+  }
+  return 'INT';
+}
+
 export function SettingsPanel({
   totalSavedCount,
   registeredSources,
+  onToggleSource,
 }: SettingsPanelProps) {
   return (
     <section className="flex w-full flex-col">
@@ -100,19 +115,45 @@ export function SettingsPanel({
               }
               highlight={platform.canScrape}
             />
-            <div className="flex flex-col gap-2 pt-3">
+            <div className="flex flex-col gap-2.5 pt-3">
               <span className="text-xs text-neutral-400">{cs.settings.activeSourcesLabel}</span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col gap-2">
                 {registeredSources.map((source) => (
-                  <span
+                  <div
                     key={source.id}
-                    className="rounded-lg border border-neutral-700/80 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-200"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/80 px-3 py-2.5"
                   >
-                    {source.name}{' '}
-                    <span className="text-neutral-500">
-                      ({source.baseUrl.replace(/^https?:\/\/(?:www\.)?/, '')})
-                    </span>
-                  </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-sm font-medium text-neutral-100">
+                          {source.name}
+                        </span>
+                        <span className="shrink-0 rounded border border-neutral-700 bg-neutral-800 px-1.5 py-0.5 text-[10px] font-semibold text-neutral-300">
+                          {formatLanguageTag(source.language)}
+                        </span>
+                      </div>
+                      <p className="truncate text-xs text-neutral-500">
+                        {source.baseUrl.replace(/^https?:\/\/(?:www\.)?/, '')}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={source.enabled}
+                      aria-label={source.name}
+                      onClick={() => onToggleSource(source.id, !source.enabled)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
+                        source.enabled ? 'bg-amber-500' : 'bg-neutral-700'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                          source.enabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

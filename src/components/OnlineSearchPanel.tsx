@@ -161,6 +161,7 @@ export function OnlineSearchPanel({
       <SongPreview
         chordproContent={selectedSong.chordproContent}
         sourceName={selectedSong.providerName}
+        sourceUrl={selectedSong.sourceUrl}
         fallbackTitle={selectedSong.title}
         fallbackArtist={selectedSong.artist}
         isSaved={Boolean(savedMatch)}

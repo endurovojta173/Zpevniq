@@ -117,6 +117,9 @@ function decodeResponseBody(
     if (typeof data === 'string') {
       return data;
     }
+    if (typeof data === 'object' && data !== null) {
+      return JSON.stringify(data);
+    }
     if (data !== null && data !== undefined) {
       return String(data);
     }

@@ -1,16 +1,34 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { type AppSection, BottomNav } from './components/BottomNav';
 import { OnlineSearchPanel } from './components/OnlineSearchPanel';
 import { SavedSongsPanel } from './components/SavedSongsPanel';
-import { SettingsPanel } from './components/SettingsPanel';
+import { type RegisteredSourceInfo, SettingsPanel } from './components/SettingsPanel';
 import { WebImportFallback } from './components/WebImportFallback';
 import { useSavedSongs } from './hooks/useSavedSongs';
 import cs from './i18n/cs.json';
 import { platform } from './services/platform';
-import { getAllProviders } from './services/scrapers/registry';
+import {
+  getAllProviders,
+  isProviderEnabled,
+  setProviderEnabled,
+} from './services/scrapers/registry';
+
+function buildRegisteredSources(): RegisteredSourceInfo[] {
+  return getAllProviders().map((provider) => ({
+    id: provider.id,
+    name: provider.name,
+    baseUrl: provider.baseUrl,
+    language: provider.language,
+    enabled: isProviderEnabled(provider.id),
+  }));
+}
 
 export function App() {
   const [activeSection, setActiveSection] = useState<AppSection>('library');
+  const [registeredSources, setRegisteredSources] = useState<readonly RegisteredSourceInfo[]>(
+    () => buildRegisteredSources(),
+  );
+
   const {
     savedSongs,
     totalSavedCount,
@@ -23,15 +41,10 @@ export function App() {
     deleteSong,
   } = useSavedSongs();
 
-  const registeredSources = useMemo(
-    () =>
-      getAllProviders().map((provider) => ({
-        id: provider.id,
-        name: provider.name,
-        baseUrl: provider.baseUrl,
-      })),
-    [],
-  );
+  const handleToggleSource = useCallback((id: string, enabled: boolean) => {
+    setProviderEnabled(id, enabled);
+    setRegisteredSources(buildRegisteredSources());
+  }, []);
 
   const discoverLabel = platform.canScrape ? cs.tabs.onlineSearch : cs.tabs.fileImport;
 
@@ -68,6 +81,7 @@ export function App() {
           <SettingsPanel
             totalSavedCount={totalSavedCount}
             registeredSources={registeredSources}
+            onToggleSource={handleToggleSource}
           />
         )}
       </main>
