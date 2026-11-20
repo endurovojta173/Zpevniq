@@ -5,6 +5,22 @@
     "platformMobile": "Nativní mobilní režim",
     "platformWeb": "Webový režim"
   },
+  "tabs": {
+    "mySongbook": "Můj zpěvník",
+    "onlineSearch": "Najít online",
+    "fileImport": "Import souboru"
+  },
+  "library": {
+    "searchPlaceholder": "Hledat v mém zpěvníku…",
+    "loading": "Načítám uložené písně…",
+    "emptyTitle": "Tvůj zpěvník je zatím prázdný",
+    "emptyDescription": "Najdi píseň online nebo ji importuj ze souboru a ulož si ji jedním klepnutím pro offline hraní.",
+    "goToSearch": "Najít písně online",
+    "noMatches": "V tvém zpěvníku neodpovídá žádná píseň.",
+    "loadError": "Nepodařilo se načíst lokální databázi písní.",
+    "deleteError": "Píseň se nepodařilo odebrat ze zpěvníku.",
+    "localSource": "Lokální soubor"
+  },
   "search": {
     "placeholder": "Název písně nebo interpreta…",
     "submit": "Hledat",
@@ -15,6 +31,7 @@
     "resultsCount": "výsledků",
     "loadingSong": "Načítám píseň a převádím do ChordPro…",
     "retry": "Zkusit znovu",
+    "savedBadge": "✓ Uloženo",
     "matchType": {
       "title": "Název",
       "artist": "Interpret",
@@ -44,7 +61,12 @@
     "keyLabel": "Tónina",
     "capoLabel": "Kapo",
     "sourceLabel": "Zdroj",
-    "localFileSource": "Lokální soubor"
+    "localFileSource": "Lokální soubor",
+    "saveToSongbook": "＋ Uložit do zpěvníku",
+    "saving": "Ukládám…",
+    "savedBadge": "✓ Uloženo ve zpěvníku",
+    "removeFromSongbook": "Odebrat",
+    "saveError": "Nepodařilo se uložit změnu do lokální databáze."
   },
   "webFallback": {
     "title": "Online vyhledávání běží pouze na mobilu",

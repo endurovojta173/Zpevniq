@@ -1,12 +1,19 @@
-import { type FormEvent, useRef } from 'react';
+import { type FormEvent, useRef, useState } from 'react';
 import type {
   ProviderSearchStatus,
   ScraperErrorCode,
   SongSearchResult,
 } from '../core/types/scraper';
+import type { SaveSongInput, SavedSong } from '../core/types/song';
 import { useSongSearch } from '../hooks/useSongSearch';
 import cs from '../i18n/cs.json';
 import { SongPreview } from './SongPreview';
+
+export interface OnlineSearchPanelProps {
+  readonly findSavedSong: (sourceUrl?: string | null, id?: string | null) => SavedSong | undefined;
+  readonly onSaveSong: (input: SaveSongInput) => Promise<SavedSong>;
+  readonly onDeleteSong: (id: string) => Promise<void>;
+}
 
 function getErrorMessage(code: ScraperErrorCode): string {
   return cs.search.errors[code];
@@ -44,9 +51,11 @@ function ProviderStatusPill({ status }: { readonly status: ProviderSearchStatus 
 
 function SearchResultRow({
   result,
+  isSaved,
   onSelect,
 }: {
   readonly result: SongSearchResult;
+  readonly isSaved: boolean;
   readonly onSelect: (item: SongSearchResult) => void;
 }) {
   return (
@@ -56,7 +65,14 @@ function SearchResultRow({
       className="flex w-full items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/70 px-4 py-3 text-left transition hover:border-neutral-700 hover:bg-neutral-900 active:scale-[0.99]"
     >
       <div className="min-w-0 flex-1">
-        <p className="truncate font-medium text-neutral-100">{result.title}</p>
+        <div className="flex items-center gap-2">
+          <p className="truncate font-medium text-neutral-100">{result.title}</p>
+          {isSaved ? (
+            <span className="shrink-0 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+              {cs.search.savedBadge}
+            </span>
+          ) : null}
+        </div>
         <p className="truncate text-sm text-neutral-400">{result.artist}</p>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1">
@@ -71,8 +87,15 @@ function SearchResultRow({
   );
 }
 
-export function OnlineSearchPanel() {
+export function OnlineSearchPanel({
+  findSavedSong,
+  onSaveSong,
+  onDeleteSong,
+}: OnlineSearchPanelProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const {
     query,
     setQuery,
@@ -102,13 +125,61 @@ export function OnlineSearchPanel() {
   };
 
   if (selectedSong) {
+    const savedMatch = findSavedSong(selectedSong.sourceUrl);
+
+    const handleSave = async () => {
+      setIsSaving(true);
+      setSaveError(null);
+      try {
+        await onSaveSong({
+          chordproContent: selectedSong.chordproContent,
+          sourceProvider: selectedSong.providerId,
+          sourceUrl: selectedSong.sourceUrl,
+        });
+      } catch (err) {
+        setSaveError(err instanceof Error ? err.message : cs.preview.saveError);
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    const handleDelete = savedMatch
+      ? async () => {
+          setIsSaving(true);
+          setSaveError(null);
+          try {
+            await onDeleteSong(savedMatch.id);
+          } catch (err) {
+            setSaveError(err instanceof Error ? err.message : cs.preview.saveError);
+          } finally {
+            setIsSaving(false);
+          }
+        }
+      : undefined;
+
     return (
       <SongPreview
         chordproContent={selectedSong.chordproContent}
         sourceName={selectedSong.providerName}
         fallbackTitle={selectedSong.title}
         fallbackArtist={selectedSong.artist}
-        onBack={clearSelectedSong}
+        isSaved={Boolean(savedMatch)}
+        isSaving={isSaving}
+        saveError={saveError}
+        onSave={() => {
+          void handleSave();
+        }}
+        onDelete={
+          handleDelete
+            ? () => {
+                void handleDelete();
+              }
+            : undefined
+        }
+        onBack={() => {
+          setSaveError(null);
+          clearSelectedSong();
+        }}
       />
     );
   }
@@ -200,7 +271,15 @@ export function OnlineSearchPanel() {
       ) : results.length > 0 ? (
         <div className="flex flex-col gap-2">
           {results.map((item) => (
-            <SearchResultRow key={item.id} result={item} onSelect={openResult} />
+            <SearchResultRow
+              key={item.id}
+              result={item}
+              isSaved={Boolean(findSavedSong(item.url))}
+              onSelect={(selected) => {
+                setSaveError(null);
+                openResult(selected);
+              }}
+            />
           ))}
         </div>
       ) : isSearching ? (

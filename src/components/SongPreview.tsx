@@ -7,6 +7,11 @@ export interface SongPreviewProps {
   readonly sourceName: string;
   readonly fallbackTitle?: string;
   readonly fallbackArtist?: string;
+  readonly isSaved?: boolean;
+  readonly isSaving?: boolean;
+  readonly saveError?: string | null;
+  readonly onSave?: () => void;
+  readonly onDelete?: () => void;
   readonly onBack: () => void;
 }
 
@@ -15,6 +20,11 @@ export function SongPreview({
   sourceName,
   fallbackTitle,
   fallbackArtist,
+  isSaved = false,
+  isSaving = false,
+  saveError = null,
+  onSave,
+  onDelete,
   onBack,
 }: SongPreviewProps) {
   const [viewMode, setViewMode] = useState<'formatted' | 'raw'>('formatted');
@@ -34,31 +44,68 @@ export function SongPreview({
           ← {cs.preview.back}
         </button>
 
-        <div className="inline-flex rounded-lg border border-neutral-800 bg-neutral-900 p-0.5 text-xs">
-          <button
-            type="button"
-            onClick={() => setViewMode('formatted')}
-            className={`rounded-md px-3 py-1 font-medium transition ${
-              viewMode === 'formatted'
-                ? 'bg-amber-500 text-neutral-950'
-                : 'text-neutral-400 hover:text-neutral-200'
-            }`}
-          >
-            {cs.preview.formattedView}
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('raw')}
-            className={`rounded-md px-3 py-1 font-medium transition ${
-              viewMode === 'raw'
-                ? 'bg-amber-500 text-neutral-950'
-                : 'text-neutral-400 hover:text-neutral-200'
-            }`}
-          >
-            {cs.preview.rawChordPro}
-          </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {!isSaved && onSave ? (
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={onSave}
+              className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSaving ? cs.preview.saving : cs.preview.saveToSongbook}
+            </button>
+          ) : null}
+
+          {isSaved ? (
+            <div className="flex items-center gap-1.5">
+              <span className="rounded-lg border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-1.5 text-xs font-medium text-emerald-300">
+                {cs.preview.savedBadge}
+              </span>
+              {onDelete ? (
+                <button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={onDelete}
+                  className="rounded-lg border border-red-500/40 bg-red-500/10 px-2.5 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {cs.preview.removeFromSongbook}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="inline-flex rounded-lg border border-neutral-800 bg-neutral-900 p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => setViewMode('formatted')}
+              className={`rounded-md px-3 py-1 font-medium transition ${
+                viewMode === 'formatted'
+                  ? 'bg-amber-500 text-neutral-950'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              {cs.preview.formattedView}
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('raw')}
+              className={`rounded-md px-3 py-1 font-medium transition ${
+                viewMode === 'raw'
+                  ? 'bg-amber-500 text-neutral-950'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              {cs.preview.rawChordPro}
+            </button>
+          </div>
         </div>
       </div>
+
+      {saveError ? (
+        <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-xs text-red-200">
+          {cs.preview.saveError}
+        </div>
+      ) : null}
 
       <header className="flex flex-col gap-1">
         <h2 className="text-2xl font-bold tracking-tight text-white">{displayTitle}</h2>

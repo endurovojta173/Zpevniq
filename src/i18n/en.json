@@ -5,6 +5,22 @@
     "platformMobile": "Native mobile mode",
     "platformWeb": "Web mode"
   },
+  "tabs": {
+    "mySongbook": "My Songbook",
+    "onlineSearch": "Find Online",
+    "fileImport": "Import File"
+  },
+  "library": {
+    "searchPlaceholder": "Search in my songbook…",
+    "loading": "Loading saved songs…",
+    "emptyTitle": "Your songbook is empty",
+    "emptyDescription": "Find a song online or import a local file and save it with one tap for offline playing.",
+    "goToSearch": "Find songs online",
+    "noMatches": "No saved songs match your search.",
+    "loadError": "Failed to load local song database.",
+    "deleteError": "Failed to remove song from songbook.",
+    "localSource": "Local file"
+  },
   "search": {
     "placeholder": "Song title or artist…",
     "submit": "Search",
@@ -15,6 +31,7 @@
     "resultsCount": "results",
     "loadingSong": "Loading song and converting to ChordPro…",
     "retry": "Retry",
+    "savedBadge": "✓ Saved",
     "matchType": {
       "title": "Title",
       "artist": "Artist",
@@ -44,7 +61,12 @@
     "keyLabel": "Key",
     "capoLabel": "Capo",
     "sourceLabel": "Source",
-    "localFileSource": "Local file"
+    "localFileSource": "Local file",
+    "saveToSongbook": "＋ Save to Songbook",
+    "saving": "Saving…",
+    "savedBadge": "✓ Saved to Songbook",
+    "removeFromSongbook": "Remove",
+    "saveError": "Failed to update local database."
   },
   "webFallback": {
     "title": "Online search is available on mobile only",
