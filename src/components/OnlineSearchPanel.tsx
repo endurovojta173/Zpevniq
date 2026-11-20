@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useRef, useState } from 'react';
+import type { ChordNotation } from '../core/chordpro/transposer';
 import type {
   ProviderSearchStatus,
   ScraperErrorCode,
@@ -8,12 +9,12 @@ import type { SaveSongInput, SavedSong } from '../core/types/song';
 import { useSongSearch } from '../hooks/useSongSearch';
 import cs from '../i18n/cs.json';
 import { platform } from '../services/platform';
+import { getProviderById } from '../services/scrapers/registry';
 import { SongPreview } from './SongPreview';
 
 export interface OnlineSearchPanelProps {
   readonly findSavedSong: (sourceUrl?: string | null, id?: string | null) => SavedSong | undefined;
-  readonly isStageMode?: boolean;
-  readonly onToggleStageMode?: () => void;
+  readonly chordNotation?: ChordNotation;
   readonly onSongOpenChange?: (isOpen: boolean) => void;
   readonly onSaveSong: (input: SaveSongInput) => Promise<SavedSong>;
   readonly onDeleteSong: (id: string) => Promise<void>;
@@ -109,8 +110,7 @@ function SearchResultsSkeleton() {
 
 export function OnlineSearchPanel({
   findSavedSong,
-  isStageMode = false,
-  onToggleStageMode,
+  chordNotation = 'cs',
   onSongOpenChange,
   onSaveSong,
   onDeleteSong,
@@ -155,13 +155,16 @@ export function OnlineSearchPanel({
 
   if (selectedSong) {
     const savedMatch = findSavedSong(selectedSong.sourceUrl);
+    const providerLanguage = getProviderById(selectedSong.providerId)?.language;
+    const sourceNotationHint: ChordNotation = providerLanguage === 'en' ? 'intl' : 'cs';
 
-    const handleSave = async () => {
+    const handleSave = async (chordproToSave?: string) => {
       setIsSaving(true);
       setSaveError(null);
       try {
         await onSaveSong({
-          chordproContent: selectedSong.chordproContent,
+          ...(savedMatch ? { id: savedMatch.id } : {}),
+          chordproContent: chordproToSave ?? selectedSong.chordproContent,
           sourceProvider: selectedSong.providerId,
           sourceUrl: selectedSong.sourceUrl,
         });
@@ -188,7 +191,7 @@ export function OnlineSearchPanel({
 
     return (
       <SongPreview
-        chordproContent={selectedSong.chordproContent}
+        chordproContent={savedMatch ? savedMatch.chordproContent : selectedSong.chordproContent}
         sourceName={selectedSong.providerName}
         sourceUrl={selectedSong.sourceUrl}
         fallbackTitle={selectedSong.title}
@@ -196,11 +199,18 @@ export function OnlineSearchPanel({
         isSaved={Boolean(savedMatch)}
         isSaving={isSaving}
         saveError={saveError}
-        isStageMode={isStageMode}
-        onToggleStageMode={onToggleStageMode}
-        onSave={() => {
-          void handleSave();
+        chordNotation={chordNotation}
+        sourceNotationHint={sourceNotationHint}
+        onSave={(chordproToSave) => {
+          void handleSave(chordproToSave);
         }}
+        onSaveTransposed={
+          savedMatch
+            ? (updated) => {
+                void handleSave(updated);
+              }
+            : undefined
+        }
         onDelete={
           handleDelete
             ? () => {

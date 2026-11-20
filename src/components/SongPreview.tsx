@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import { groupLineIntoWordClusters, parseChordProPreview } from '../core/chordpro/preview';
 import {
-  groupLineIntoWordClusters,
-  parseChordProPreview,
-} from '../core/chordpro/preview';
+  type ChordNotation,
+  transposeChordPro,
+  transposePreview,
+} from '../core/chordpro/transposer';
 import cs from '../i18n/cs.json';
 import { platform } from '../services/platform';
 
@@ -11,6 +13,11 @@ const MIN_FONT_SCALE = 80;
 const MAX_FONT_SCALE = 160;
 const DEFAULT_FONT_SCALE = 100;
 const FONT_SCALE_STEP = 10;
+
+const MIN_TRANSPOSE = -11;
+const MAX_TRANSPOSE = 11;
+const MIN_CAPO = 0;
+const MAX_CAPO = 11;
 
 function readInitialFontScale(): number {
   try {
@@ -39,6 +46,10 @@ function persistFontScale(value: number): void {
   }
 }
 
+function formatTransposeOffset(steps: number): string {
+  return steps > 0 ? `+${steps}` : String(steps);
+}
+
 export interface SongPreviewProps {
   readonly chordproContent: string;
   readonly sourceName: string;
@@ -48,9 +59,10 @@ export interface SongPreviewProps {
   readonly isSaved?: boolean;
   readonly isSaving?: boolean;
   readonly saveError?: string | null;
-  readonly isStageMode?: boolean;
-  readonly onToggleStageMode?: () => void;
-  readonly onSave?: () => void;
+  readonly chordNotation?: ChordNotation;
+  readonly sourceNotationHint?: ChordNotation;
+  readonly onSave?: (chordproContent?: string) => void;
+  readonly onSaveTransposed?: (transposedChordpro: string) => void;
   readonly onDelete?: () => void;
   readonly onBack: () => void;
 }
@@ -64,20 +76,55 @@ export function SongPreview({
   isSaved = false,
   isSaving = false,
   saveError = null,
-  isStageMode = false,
-  onToggleStageMode,
+  chordNotation = 'cs',
+  sourceNotationHint = 'cs',
   onSave,
+  onSaveTransposed,
   onDelete,
   onBack,
 }: SongPreviewProps) {
-  const [viewMode, setViewMode] = useState<'formatted' | 'raw'>('formatted');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [songFontScale, setSongFontScale] = useState<number>(() => readInitialFontScale());
 
   const parsed = useMemo(() => parseChordProPreview(chordproContent), [chordproContent]);
-  const displayTitle = parsed.title ?? fallbackTitle ?? cs.preview.untitled;
-  const displayArtist = parsed.artist ?? fallbackArtist;
+  const baseCapo = parsed.capo ?? 0;
+
+  const [transposeSteps, setTransposeSteps] = useState(0);
+  const [capoFret, setCapoFret] = useState(baseCapo);
+
+  useEffect(() => {
+    setTransposeSteps(0);
+    setCapoFret(baseCapo);
+  }, [chordproContent, baseCapo]);
+
+  const effectiveSemitones = transposeSteps - (capoFret - baseCapo);
+  const hasPendingTransform = transposeSteps !== 0 || capoFret !== baseCapo;
+
+  const transposedPreview = useMemo(
+    () =>
+      transposePreview(parsed, {
+        semitones: effectiveSemitones,
+        targetNotation: chordNotation,
+        sourceNotationHint,
+        capo: capoFret,
+      }),
+    [parsed, effectiveSemitones, chordNotation, sourceNotationHint, capoFret],
+  );
+
+  const activeChordPro = useMemo(
+    () =>
+      transposeChordPro(chordproContent, {
+        semitones: effectiveSemitones,
+        targetNotation: chordNotation,
+        sourceNotationHint,
+        capo: capoFret,
+      }),
+    [chordproContent, effectiveSemitones, chordNotation, sourceNotationHint, capoFret],
+  );
+
+  const displayTitle = transposedPreview.title ?? fallbackTitle ?? cs.preview.untitled;
+  const displayArtist = transposedPreview.artist ?? fallbackArtist;
   const safeSourceUrl =
     sourceUrl && /^https?:\/\//i.test(sourceUrl) ? sourceUrl : null;
 
@@ -102,6 +149,22 @@ export function SongPreview({
       platform.hapticTap();
       setSongFontScale(clamped);
       persistFontScale(clamped);
+    }
+  };
+
+  const updateTransposeSteps = (next: number) => {
+    const clamped = Math.min(MAX_TRANSPOSE, Math.max(MIN_TRANSPOSE, next));
+    if (clamped !== transposeSteps) {
+      platform.hapticTap();
+      setTransposeSteps(clamped);
+    }
+  };
+
+  const updateCapoFret = (next: number) => {
+    const clamped = Math.min(MAX_CAPO, Math.max(MIN_CAPO, next));
+    if (clamped !== capoFret) {
+      platform.hapticTap();
+      setCapoFret(clamped);
     }
   };
 
@@ -139,7 +202,7 @@ export function SongPreview({
                 disabled={isSaving}
                 onClick={() => {
                   platform.hapticTap();
-                  onSave();
+                  onSave(hasPendingTransform ? activeChordPro : chordproContent);
                 }}
                 className="inline-flex min-h-12 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-semibold text-on-primary transition-transform duration-150 hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
@@ -214,7 +277,7 @@ export function SongPreview({
         </div>
       </div>
 
-      <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4 pt-5 pb-6 pl-[calc(env(safe-area-inset-left)+1rem)] pr-[calc(env(safe-area-inset-right)+1rem)]">
+      <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-4 pt-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pl-[calc(env(safe-area-inset-left)+1rem)] pr-[calc(env(safe-area-inset-right)+1rem)]">
         {saveError ? (
           <div
             role="alert"
@@ -235,15 +298,27 @@ export function SongPreview({
           ) : null}
 
           <div className="mt-2 flex flex-wrap gap-2 text-xs">
-            {parsed.key ? (
+            {transposedPreview.key ? (
               <span className="inline-flex items-center rounded-full border border-primary/35 bg-primary-container px-3 py-1 font-semibold text-on-primary-container">
-                {cs.preview.keyLabel}: {parsed.key}
+                {cs.preview.keyLabel}: {transposedPreview.key}
               </span>
             ) : null}
-            {parsed.capo ? (
+            {capoFret > 0 ? (
               <span className="inline-flex items-center rounded-full border border-outline-variant bg-surface-container px-3 py-1 font-medium text-on-surface tabular-nums">
-                {cs.preview.capoLabel}: {parsed.capo}
+                {cs.preview.capoLabel}: {capoFret}
               </span>
+            ) : null}
+            {transposeSteps !== 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  platform.hapticTap();
+                  setIsSheetOpen(true);
+                }}
+                className="inline-flex items-center rounded-full border border-primary/35 bg-primary-container px-3 py-1 font-semibold text-on-primary-container tabular-nums"
+              >
+                {cs.preview.transposeLabel}: {formatTransposeOffset(transposeSteps)}
+              </button>
             ) : null}
             {safeSourceUrl ? (
               <a
@@ -265,80 +340,71 @@ export function SongPreview({
           </div>
         </header>
 
-        {viewMode === 'raw' ? (
-          <pre
-            style={{ fontSize: `${(songFontScale / 100) * 0.875}rem` }}
-            className="select-text w-full max-w-full overflow-x-auto rounded-2xl border border-outline-variant bg-surface-container-low p-4 font-mono leading-relaxed text-on-surface whitespace-pre-wrap break-words sm:p-6"
-          >
-            {chordproContent}
-          </pre>
-        ) : (
-          <div
-            style={{ fontSize: `${songFontScale / 100}rem` }}
-            className="select-text w-full min-w-0 overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low p-4 font-sans leading-relaxed text-on-surface sm:p-6"
-          >
-            {parsed.lines.map((line, lineIdx) => {
-              if (line.kind === 'empty') {
-                return <div key={lineIdx} className="h-3.5" />;
-              }
+        <div
+          style={{ fontSize: `${songFontScale / 100}rem` }}
+          className="select-text w-full min-w-0 overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low p-4 font-sans leading-relaxed text-on-surface sm:p-6"
+        >
+          {transposedPreview.lines.map((line, lineIdx) => {
+            if (line.kind === 'empty') {
+              return <div key={lineIdx} className="h-3.5" />;
+            }
 
-              if (line.kind === 'comment') {
-                return (
-                  <p
-                    key={lineIdx}
-                    className="mt-4 mb-1 text-xs font-bold tracking-wider text-chord uppercase break-words"
-                  >
-                    {line.text}
-                  </p>
-                );
-              }
-
-              if (!line.hasChords) {
-                const plainLine = line.segments
-                  .map((segment) => segment.lyric)
-                  .join('')
-                  .trimStart();
-                return (
-                  <p key={lineIdx} className="mt-1 leading-snug text-on-surface break-words">
-                    {plainLine.length > 0 ? plainLine : '\u00A0'}
-                  </p>
-                );
-              }
-
-              const clusters = groupLineIntoWordClusters(line.segments);
+            if (line.kind === 'comment') {
               return (
-                <div
+                <p
                   key={lineIdx}
-                  className="mt-3 flex flex-wrap items-end gap-y-1.5 leading-snug"
+                  className="mt-4 mb-1 text-xs font-bold tracking-wider text-chord uppercase break-words"
                 >
-                  {clusters.map((cluster, clusterIdx) => (
-                    <span
-                      key={clusterIdx}
-                      className={`inline-flex max-w-full flex-wrap items-end ${
-                        cluster.trailingSpace ? 'mr-[0.38em]' : ''
-                      }`}
-                    >
-                      {cluster.parts.map((part, partIdx) => (
-                        <span key={partIdx} className="inline-flex max-w-full flex-col">
-                          <span
-                            className={`min-h-[1.25em] text-[0.82em] leading-tight font-bold text-chord ${
-                              part.chord ? 'pr-1' : ''
-                            }`}
-                          >
-                            {part.chord ?? '\u00A0'}
-                          </span>
-                          <span className="break-words">
-                            {part.lyric.length > 0 ? part.lyric : '\u00A0'}
-                          </span>
-                        </span>
-                      ))}
-                    </span>
-                  ))}
-                </div>
+                  {line.text}
+                </p>
               );
-            })}
-          </div>
-        )}
+            }
+
+            if (!line.hasChords) {
+              const plainLine = line.segments
+                .map((segment) => segment.lyric)
+                .join('')
+                .trimStart();
+              return (
+                <p key={lineIdx} className="mt-1 leading-snug text-on-surface break-words">
+                  {plainLine.length > 0 ? plainLine : '\u00A0'}
+                </p>
+              );
+            }
+
+            const clusters = groupLineIntoWordClusters(line.segments);
+            return (
+              <div
+                key={lineIdx}
+                className="mt-3 flex flex-wrap items-end gap-y-1.5 leading-snug"
+              >
+                {clusters.map((cluster, clusterIdx) => (
+                  <span
+                    key={clusterIdx}
+                    className={`inline-flex max-w-full flex-wrap items-end ${
+                      cluster.trailingSpace ? 'mr-[0.38em]' : ''
+                    }`}
+                  >
+                    {cluster.parts.map((part, partIdx) => (
+                      <span key={partIdx} className="inline-flex max-w-full flex-col">
+                        <span
+                          className={`min-h-[1.25em] text-[0.82em] leading-tight font-bold text-chord ${
+                            part.chord ? 'pr-1' : ''
+                          }`}
+                        >
+                          {part.chord ?? '\u00A0'}
+                        </span>
+                        <span className="break-words">
+                          {part.lyric.length > 0 ? part.lyric : '\u00A0'}
+                        </span>
+                      </span>
+                    ))}
+                  </span>
+                ))}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {isSheetOpen ? (
@@ -351,7 +417,7 @@ export function SongPreview({
             aria-modal="true"
             aria-labelledby="song-sheet-title"
             onClick={(event) => event.stopPropagation()}
-            className="w-full max-w-lg rounded-t-[28px] border-t border-outline-variant bg-surface-container-high px-5 pt-3 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] text-on-surface shadow-2xl select-none"
+            className="max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-t-[28px] border-t border-outline-variant bg-surface-container-high px-5 pt-3 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] text-on-surface shadow-2xl select-none"
           >
             <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-outline/60" aria-hidden="true" />
 
@@ -383,6 +449,101 @@ export function SongPreview({
 
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface-container p-3.5">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-on-surface">
+                    {cs.preview.transposeLabel}
+                  </p>
+                  {transposedPreview.key ? (
+                    <p className="text-xs text-on-surface-variant">
+                      {cs.preview.keyLabel}: {transposedPreview.key}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={transposeSteps <= MIN_TRANSPOSE}
+                    onClick={() => updateTransposeSteps(transposeSteps - 1)}
+                    aria-label={cs.preview.transposeDown}
+                    className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-low text-base font-bold text-on-surface transition-colors hover:bg-surface-container-highest disabled:opacity-40"
+                  >
+                    −
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateTransposeSteps(0)}
+                    title={cs.preview.transposeReset}
+                    className="inline-flex min-h-12 min-w-14 items-center justify-center rounded-xl px-2 text-sm font-semibold text-on-surface tabular-nums hover:bg-surface-container-highest"
+                  >
+                    {formatTransposeOffset(transposeSteps)}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={transposeSteps >= MAX_TRANSPOSE}
+                    onClick={() => updateTransposeSteps(transposeSteps + 1)}
+                    aria-label={cs.preview.transposeUp}
+                    className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-low text-base font-bold text-on-surface transition-colors hover:bg-surface-container-highest disabled:opacity-40"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 rounded-2xl bg-surface-container p-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-medium text-on-surface">
+                    {cs.preview.capoLabel}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={capoFret <= MIN_CAPO}
+                      onClick={() => updateCapoFret(capoFret - 1)}
+                      aria-label={cs.preview.capoDown}
+                      className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-low text-base font-bold text-on-surface transition-colors hover:bg-surface-container-highest disabled:opacity-40"
+                    >
+                      −
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateCapoFret(baseCapo)}
+                      title={cs.preview.capoNone}
+                      className="inline-flex min-h-12 min-w-20 items-center justify-center rounded-xl px-2 text-sm font-semibold text-on-surface tabular-nums hover:bg-surface-container-highest"
+                    >
+                      {capoFret === 0
+                        ? cs.preview.capoNone
+                        : `${capoFret}${cs.preview.capoFretSuffix}`}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={capoFret >= MAX_CAPO}
+                      onClick={() => updateCapoFret(capoFret + 1)}
+                      aria-label={cs.preview.capoUp}
+                      className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-low text-base font-bold text-on-surface transition-colors hover:bg-surface-container-highest disabled:opacity-40"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-on-surface-variant">{cs.preview.capoHint}</p>
+              </div>
+
+              {isSaved && onSaveTransposed && hasPendingTransform ? (
+                <button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() => {
+                    platform.hapticTap();
+                    setIsSheetOpen(false);
+                    onSaveTransposed(activeChordPro);
+                  }}
+                  className="min-h-12 w-full rounded-2xl bg-primary px-4 text-sm font-semibold text-on-primary transition-transform duration-150 hover:brightness-110 active:scale-[0.99] disabled:opacity-60"
+                >
+                  {isSaving ? cs.preview.saving : cs.preview.saveTransposition}
+                </button>
+              ) : null}
+
+              <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface-container p-3.5">
                 <span className="text-sm font-medium text-on-surface">
                   {cs.preview.fontSizeLabel}
                 </span>
@@ -412,84 +573,6 @@ export function SongPreview({
                     className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-low text-base font-bold text-on-surface transition-colors hover:bg-surface-container-highest disabled:opacity-40"
                   >
                     +
-                  </button>
-                </div>
-              </div>
-
-              {onToggleStageMode ? (
-                <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface-container p-3.5">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-on-surface">
-                      {cs.preview.stageModeLabel}
-                    </p>
-                    <p className="text-xs text-on-surface-variant">
-                      {cs.preview.stageModeDescription}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isStageMode}
-                    aria-label={cs.preview.stageModeLabel}
-                    onClick={() => {
-                      platform.hapticTap();
-                      onToggleStageMode();
-                    }}
-                    className="inline-flex min-h-12 min-w-14 shrink-0 items-center justify-end"
-                  >
-                    <span
-                      className={`relative inline-flex h-8 w-[52px] items-center rounded-full border transition-colors ${
-                        isStageMode
-                          ? 'border-primary bg-primary'
-                          : 'border-outline bg-surface-container-highest'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-6 w-6 rounded-full transition-transform duration-150 ${
-                          isStageMode
-                            ? 'translate-x-6 bg-on-primary'
-                            : 'translate-x-1 bg-on-surface-variant'
-                        }`}
-                      />
-                    </span>
-                  </button>
-                </div>
-              ) : null}
-
-              <div className="flex flex-col gap-2 rounded-2xl bg-surface-container p-3.5">
-                <span className="text-xs font-semibold tracking-wider text-on-surface-variant uppercase">
-                  {cs.preview.viewModeLabel}
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    aria-pressed={viewMode === 'formatted'}
-                    onClick={() => {
-                      platform.hapticTap();
-                      setViewMode('formatted');
-                    }}
-                    className={`min-h-12 rounded-xl px-3 text-sm font-semibold transition-colors ${
-                      viewMode === 'formatted'
-                        ? 'bg-primary-container text-on-primary-container'
-                        : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'
-                    }`}
-                  >
-                    {cs.preview.formattedView}
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={viewMode === 'raw'}
-                    onClick={() => {
-                      platform.hapticTap();
-                      setViewMode('raw');
-                    }}
-                    className={`min-h-12 rounded-xl px-3 text-sm font-semibold transition-colors ${
-                      viewMode === 'raw'
-                        ? 'bg-primary-container text-on-primary-container'
-                        : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'
-                    }`}
-                  >
-                    {cs.preview.rawChordPro}
                   </button>
                 </div>
               </div>

@@ -3,6 +3,7 @@ import {
   chordsOverLyricsToChordPro,
   isAlreadyChordPro,
 } from '../core/chordpro/converter';
+import type { ChordNotation } from '../core/chordpro/transposer';
 import type { SaveSongInput, SavedSong } from '../core/types/song';
 import cs from '../i18n/cs.json';
 import { platform } from '../services/platform';
@@ -10,8 +11,7 @@ import { SongPreview } from './SongPreview';
 
 export interface WebImportFallbackProps {
   readonly findSavedSong: (sourceUrl?: string | null, id?: string | null) => SavedSong | undefined;
-  readonly isStageMode?: boolean;
-  readonly onToggleStageMode?: () => void;
+  readonly chordNotation?: ChordNotation;
   readonly onSongOpenChange?: (isOpen: boolean) => void;
   readonly onSaveSong: (input: SaveSongInput) => Promise<SavedSong>;
   readonly onDeleteSong: (id: string) => Promise<void>;
@@ -30,8 +30,7 @@ function stripFileExtension(filename: string): string {
 
 export function WebImportFallback({
   findSavedSong,
-  isStageMode = false,
-  onToggleStageMode,
+  chordNotation = 'cs',
   onSongOpenChange,
   onSaveSong,
   onDeleteSong,
@@ -85,16 +84,19 @@ export function WebImportFallback({
       ? findSavedSong(null, importedSong.savedId)
       : undefined;
 
-    const handleSave = async () => {
+    const handleSave = async (chordproToSave?: string) => {
+      const content = chordproToSave ?? importedSong.chordproContent;
       setIsSaving(true);
       setSaveError(null);
       try {
         const saved = await onSaveSong({
           id: importedSong.savedId,
-          chordproContent: importedSong.chordproContent,
+          chordproContent: content,
           sourceProvider: 'local-file',
         });
-        setImportedSong((prev) => (prev ? { ...prev, savedId: saved.id } : null));
+        setImportedSong((prev) =>
+          prev ? { ...prev, savedId: saved.id, chordproContent: content } : null,
+        );
       } catch (err) {
         setSaveError(err instanceof Error ? err.message : cs.preview.saveError);
       } finally {
@@ -133,11 +135,17 @@ export function WebImportFallback({
         isSaved={Boolean(savedMatch)}
         isSaving={isSaving}
         saveError={saveError}
-        isStageMode={isStageMode}
-        onToggleStageMode={onToggleStageMode}
-        onSave={() => {
-          void handleSave();
+        chordNotation={chordNotation}
+        onSave={(chordproToSave) => {
+          void handleSave(chordproToSave);
         }}
+        onSaveTransposed={
+          savedMatch
+            ? (updated) => {
+                void handleSave(updated);
+              }
+            : undefined
+        }
         onDelete={
           handleDelete
             ? () => {

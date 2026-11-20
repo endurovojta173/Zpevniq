@@ -1,3 +1,4 @@
+import type { ChordNotation } from '../core/chordpro/transposer';
 import type { ThemePreference } from '../hooks/useTheme';
 import cs from '../i18n/cs.json';
 import { platform } from '../services/platform';
@@ -15,7 +16,9 @@ export interface SettingsPanelProps {
   readonly totalSavedCount: number;
   readonly registeredSources: readonly RegisteredSourceInfo[];
   readonly themePreference: ThemePreference;
+  readonly chordNotation: ChordNotation;
   readonly onThemePreferenceChange: (preference: ThemePreference) => void;
+  readonly onChordNotationChange: (notation: ChordNotation) => void;
   readonly onToggleSource: (id: string, enabled: boolean) => void;
 }
 
@@ -65,7 +68,9 @@ export function SettingsPanel({
   totalSavedCount,
   registeredSources,
   themePreference,
+  chordNotation,
   onThemePreferenceChange,
+  onChordNotationChange,
   onToggleSource,
 }: SettingsPanelProps) {
   return (
@@ -113,6 +118,42 @@ export function SettingsPanel({
           {themePreference === 'stage' ? (
             <p className="mt-2.5 text-xs text-on-surface-variant">{cs.settings.stageHint}</p>
           ) : null}
+
+          <p className="mt-4 mb-2 text-sm text-on-surface-variant">
+            {cs.settings.notationLabel}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              aria-pressed={chordNotation === 'cs'}
+              onClick={() => {
+                platform.hapticTap();
+                onChordNotationChange('cs');
+              }}
+              className={`min-h-12 rounded-xl border px-3 text-xs font-semibold select-none transition-colors duration-150 ${
+                chordNotation === 'cs'
+                  ? 'border-primary/50 bg-primary-container text-on-primary-container'
+                  : 'border-outline-variant bg-surface-container text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              {cs.settings.notations.cs}
+            </button>
+            <button
+              type="button"
+              aria-pressed={chordNotation === 'intl'}
+              onClick={() => {
+                platform.hapticTap();
+                onChordNotationChange('intl');
+              }}
+              className={`min-h-12 rounded-xl border px-3 text-xs font-semibold select-none transition-colors duration-150 ${
+                chordNotation === 'intl'
+                  ? 'border-primary/50 bg-primary-container text-on-primary-container'
+                  : 'border-outline-variant bg-surface-container text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              {cs.settings.notations.intl}
+            </button>
+          </div>
         </div>
 
         <div className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">

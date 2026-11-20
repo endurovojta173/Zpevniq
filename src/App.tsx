@@ -5,6 +5,7 @@ import { SavedSongsPanel } from './components/SavedSongsPanel';
 import { type RegisteredSourceInfo, SettingsPanel } from './components/SettingsPanel';
 import { WebImportFallback } from './components/WebImportFallback';
 import type { SaveSongInput } from './core/types/song';
+import { useChordNotation } from './hooks/useChordNotation';
 import { useSavedSongs } from './hooks/useSavedSongs';
 import { useTheme } from './hooks/useTheme';
 import cs from './i18n/cs.json';
@@ -38,9 +39,8 @@ export function App() {
   const {
     themePreference,
     setThemePreference,
-    isStageMode,
-    toggleStageMode,
   } = useTheme();
+  const { chordNotation, setChordNotation } = useChordNotation();
 
   const {
     savedSongs,
@@ -122,9 +122,9 @@ export function App() {
             isLoading={isLoading}
             error={error}
             discoverLabel={discoverLabel}
-            isStageMode={isStageMode}
-            onToggleStageMode={toggleStageMode}
+            chordNotation={chordNotation}
             onSongOpenChange={setIsSongOpen}
+            onSaveSong={handleSaveSong}
             onDeleteSong={handleDeleteSong}
             onSwitchToDiscover={() => handleSelectSection('search')}
           />
@@ -132,8 +132,7 @@ export function App() {
           platform.canScrape ? (
             <OnlineSearchPanel
               findSavedSong={findSavedSong}
-              isStageMode={isStageMode}
-              onToggleStageMode={toggleStageMode}
+              chordNotation={chordNotation}
               onSongOpenChange={setIsSongOpen}
               onSaveSong={handleSaveSong}
               onDeleteSong={handleDeleteSong}
@@ -141,8 +140,7 @@ export function App() {
           ) : (
             <WebImportFallback
               findSavedSong={findSavedSong}
-              isStageMode={isStageMode}
-              onToggleStageMode={toggleStageMode}
+              chordNotation={chordNotation}
               onSongOpenChange={setIsSongOpen}
               onSaveSong={handleSaveSong}
               onDeleteSong={handleDeleteSong}
@@ -153,7 +151,9 @@ export function App() {
             totalSavedCount={totalSavedCount}
             registeredSources={registeredSources}
             themePreference={themePreference}
+            chordNotation={chordNotation}
             onThemePreferenceChange={setThemePreference}
+            onChordNotationChange={setChordNotation}
             onToggleSource={handleToggleSource}
           />
         )}
@@ -163,10 +163,10 @@ export function App() {
         <div
           role="status"
           aria-live="polite"
-          className={`pointer-events-none fixed inset-x-4 z-50 flex justify-center md:left-26 ${
+          className={`pointer-events-none fixed inset-x-4 z-50 flex justify-center md:bottom-6 md:left-26 ${
             isSongOpen
               ? 'bottom-[calc(env(safe-area-inset-bottom)+1rem)]'
-              : 'bottom-[calc(env(safe-area-inset-bottom)+5.25rem)] md:bottom-6'
+              : 'bottom-[calc(env(safe-area-inset-bottom)+5.25rem)]'
           }`}
         >
           <div className="rounded-full border border-outline-variant bg-surface-container-highest px-4 py-2 text-xs font-semibold text-on-surface shadow-lg">

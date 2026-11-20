@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { SavedSong } from '../core/types/song';
+import type { ChordNotation } from '../core/chordpro/transposer';
+import type { SaveSongInput, SavedSong } from '../core/types/song';
 import cs from '../i18n/cs.json';
 import { platform } from '../services/platform';
 import { getProviderById } from '../services/scrapers/registry';
@@ -13,9 +14,9 @@ export interface SavedSongsPanelProps {
   readonly isLoading: boolean;
   readonly error: string | null;
   readonly discoverLabel: string;
-  readonly isStageMode?: boolean;
-  readonly onToggleStageMode?: () => void;
+  readonly chordNotation?: ChordNotation;
   readonly onSongOpenChange?: (isOpen: boolean) => void;
+  readonly onSaveSong?: (input: SaveSongInput) => Promise<SavedSong>;
   readonly onDeleteSong: (id: string) => Promise<void>;
   readonly onSwitchToDiscover: () => void;
 }
@@ -48,16 +49,16 @@ export function SavedSongsPanel({
   isLoading,
   error,
   discoverLabel,
-  isStageMode = false,
-  onToggleStageMode,
+  chordNotation = 'cs',
   onSongOpenChange,
+  onSaveSong,
   onDeleteSong,
   onSwitchToDiscover,
 }: SavedSongsPanelProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const selectedSong = selectedSongId
     ? savedSongs.find((song) => song.id === selectedSongId) ?? null
@@ -68,23 +69,48 @@ export function SavedSongsPanel({
     return () => onSongOpenChange?.(false);
   }, [selectedSong, onSongOpenChange]);
 
+  const handleSaveTransposed = async (transposedChordpro: string) => {
+    if (!selectedSong || !onSaveSong) {
+      return;
+    }
+    setIsMutating(true);
+    setActionError(null);
+    try {
+      await onSaveSong({
+        id: selectedSong.id,
+        chordproContent: transposedChordpro,
+        sourceProvider: selectedSong.sourceProvider,
+        sourceUrl: selectedSong.sourceUrl,
+      });
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : cs.preview.saveError);
+    } finally {
+      setIsMutating(false);
+    }
+  };
+
   const handleDeleteSelected = async () => {
     if (!selectedSong) {
       return;
     }
-    setIsDeleting(true);
-    setDeleteError(null);
+    setIsMutating(true);
+    setActionError(null);
     try {
       await onDeleteSong(selectedSong.id);
       setSelectedSongId(null);
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : cs.library.deleteError);
+      setActionError(err instanceof Error ? err.message : cs.library.deleteError);
     } finally {
-      setIsDeleting(false);
+      setIsMutating(false);
     }
   };
 
   if (selectedSong) {
+    const providerLanguage = selectedSong.sourceProvider
+      ? getProviderById(selectedSong.sourceProvider)?.language
+      : undefined;
+    const sourceNotationHint: ChordNotation = providerLanguage === 'en' ? 'intl' : 'cs';
+
     return (
       <SongPreview
         chordproContent={selectedSong.chordproContent}
@@ -93,15 +119,22 @@ export function SavedSongsPanel({
         fallbackTitle={selectedSong.title}
         fallbackArtist={selectedSong.artist || undefined}
         isSaved
-        isSaving={isDeleting}
-        saveError={deleteError}
-        isStageMode={isStageMode}
-        onToggleStageMode={onToggleStageMode}
+        isSaving={isMutating}
+        saveError={actionError}
+        chordNotation={chordNotation}
+        sourceNotationHint={sourceNotationHint}
+        onSaveTransposed={
+          onSaveSong
+            ? (updated) => {
+                void handleSaveTransposed(updated);
+              }
+            : undefined
+        }
         onDelete={() => {
           void handleDeleteSelected();
         }}
         onBack={() => {
-          setDeleteError(null);
+          setActionError(null);
           setSelectedSongId(null);
         }}
       />
@@ -198,7 +231,7 @@ export function SavedSongsPanel({
                 type="button"
                 onClick={() => {
                   platform.hapticTap();
-                  setDeleteError(null);
+                  setActionError(null);
                   setSelectedSongId(song.id);
                 }}
                 className="flex min-h-16 w-full items-center justify-between gap-3 rounded-2xl border border-outline-variant bg-surface-container-low px-4 py-3 text-left select-none transition-colors duration-150 hover:bg-surface-container active:scale-[0.99]"
